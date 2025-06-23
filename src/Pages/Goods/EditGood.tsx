@@ -23,15 +23,16 @@ import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
 
 export const EditGood: FC = () => {
   const navigate = useNavigate();
 
-
   const [type, setType] = useState('');
   const [arrayTypesForRender, setArrayTypesForRender] = useState([]);
-//   const [goodInfo, setGoodInfo] = useState({});
-  
+  //   const [goodInfo, setGoodInfo] = useState({});
+
   const [goodInfo, setGoodInfo] = useState<GoodInfo | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -45,7 +46,7 @@ export const EditGood: FC = () => {
   useEffect(() => {
     const fetchCurrentGood = async () => {
       try {
-        const good = await axios.get('/user_get_currentgood', {
+        const good = await axios.get('/admin_get_currentgood', {
           //   @ts-ignore
           params: {
             id: goodId,
@@ -72,11 +73,11 @@ export const EditGood: FC = () => {
           description_short_ru: good.data.description_short_ru,
           description_long_de: good.data.description_long_de,
           description_long_en: good.data.description_long_en,
-          description_long_ru: good.data.description_short_ru,
+          description_long_ru: good.data.description_long_ru,
           price_eu: good.data.price_eu,
         };
 
-        console.log('GOOD', goodToRender);
+        console.log('goodToRender', goodToRender);
 
         setType(good.data.type);
         setPreviewImage(`${domen}${good.data.file.url}`);
@@ -109,7 +110,6 @@ export const EditGood: FC = () => {
     fetchCurrentGood();
   }, []);
 
-
   //@ts-ignore
   const handleAllInput = (e) => {
     console.log(e.target.name, '=', e.target.value);
@@ -121,19 +121,23 @@ export const EditGood: FC = () => {
     setType(event.target.value);
   };
 
-
   interface GoodInfo {
-  img: string;
-  // добавьте другие свойства, которые используются в компоненте
-  name_en?: string;
-  name_de?: string;
-  name_ru?: string;
-  price?: number;
-  article?: string;
-  // и т.д.
-}
+    img: string;
+    // добавьте другие свойства, которые используются в компоненте
+    name_en?: string;
+    name_de?: string;
+    name_ru?: string;
+    price_eu?: number;
+    article?: string;
+    description_short_de: string;
+    description_short_en: string;
+    description_short_ru: string;
+    description_long_de: string;
+    description_long_en: string;
+    description_long_ru: string;
 
-
+    // и т.д.
+  }
 
   async function saveBtnHandler() {
     //  if (!file) {
@@ -144,7 +148,7 @@ export const EditGood: FC = () => {
     const data = new FormData();
     data.append('id', goodId);
     //@ts-ignore
-    data.append('article', goodInfo.article);
+    data.append('article', goodInfo?.article);
     //@ts-ignore
     data.append('name_de', goodInfo.name_de);
     //@ts-ignore
@@ -176,8 +180,8 @@ export const EditGood: FC = () => {
         },
       });
 
-    //   console.log('[Frontend] Upload successful:', response.data);
-    //   alert('Good updated successfully!');
+      //   console.log('[Frontend] Upload successful:', response.data);
+      //   alert('Good updated successfully!');
 
       setOpenModal(true);
     } catch (error) {
@@ -250,326 +254,439 @@ export const EditGood: FC = () => {
     setOpenModal(false);
   }
 
+  const wrapperBox = {
+    // bgcolor: 'grey',
+    margin: 'auto',
+    width: '90%',
+    minWidth: 400,
+    pt: 5,
+  };
+
+  const sectionBox = {
+    mb: 5,
+  };
+
+  const itemInSectionBox = {
+    mb: 3,
+  };
+
   return (
     <>
       <NavMenu />
-      <Box
-        component="form"
-        sx={{ '& > :not(style)': { m: 1 } }}
-        noValidate
-        autoComplete="off"
-      >
-        <List>
-          <ListItem>
-            <Button
-              variant="contained"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate('/goods-page')}
-            >
-              back
-            </Button>
-          </ListItem>
 
-          <ListItem>
-            <Typography variant="h4" gutterBottom>
-                
-              Edit good: {goodInfo?.name_en}
-            </Typography>
-          </ListItem>
+      <Box sx={wrapperBox}>
+        <Box
+          component="form"
+          sx={{ '& > :not(style)': { m: 1 } }}
+          noValidate
+          autoComplete="off"
+        >
+          <List>
+           
+            <Box sx={sectionBox}>
+              <Button
+                // variant="contained"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate('/goods-page')}
+              >
+                back
+              </Button>
+            </Box>
 
-          <ListItem>
 
-            
+<Box sx={sectionBox}>
+              <Typography variant="h4" gutterBottom>
+                Edit good: {goodInfo?.name_en}
+              </Typography>
+            </Box>
 
-            <TextField
-              id="222"
-            //   label="Article"
-              placeholder='Article'  
-              name="article"
-              margin = "normal"
-              variant="filled"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.article}
-            />
-          </ListItem>
 
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Name de"
-              placeholder='Name de'  
-              variant="filled"
-              name="name_de"
-                           
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.name_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Name en"
-              placeholder='Name en'  
-              variant="filled"
-              name="name_en"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.name_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Name ru"
-              placeholder='Name ru'  
-              variant="filled"
-              name="name_ru"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.name_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Short Description De"
-              placeholder='Short Description De'  
-              variant="filled"
-              name="description_short_de"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_short_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Short Description En"
-              placeholder='Short Description En'  
-              variant="filled"
-              name="description_short_en"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_short_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Short Description Ru"
-              placeholder='Short Description Ru'  
-              variant="filled"
-              name="description_short_ru"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_short_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Long Description De"
-              placeholder='Long Description De'  
-              variant="filled"
-              name="description_long_de"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_long_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Long Description En"
-              placeholder='Long Description En'  
-              variant="filled"
-              name="description_long_en"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_long_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-            //   label="Long Description Ru"
-              placeholder='Long Description Ru'  
-              variant="filled"
-              name="description_long_ru"
-              //   variant="standard"
-              required
-              onChange={handleAllInput}
-              //@ts-ignore
-              value={goodInfo.description_long_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <FormControl
-            //   fullWidth
-              
-              // variant="standard"
-            >
-              {/* <InputLabel htmlFor="standard-adornment-amount">
-                Price eu
-              </InputLabel> */}
-              <Input
-                id="standard-adornment-amount"
-                name="price_eu"
+              <TextField
+                fullWidth
+                variant="standard"
+                id="222"
+                //   label="Article"
+                placeholder="Article"
+                name="article"
+                // margin="normal"
                 // variant="filled"
                 required
                 onChange={handleAllInput}
-                //@ts-ignore
-                value={goodInfo.price_eu}
-                startAdornment={
-                  <InputAdornment position="start">€</InputAdornment>
-                }
-              />
-            </FormControl>
-          </ListItem>
-
-          <ListItem>
-            <FormControl
-              // variant="standard"
-              sx={{ minWidth: 180 }}
-            >
-              {/* <InputLabel id="demo-simple-select-standard-label">
-                Type
-              </InputLabel> */}
-              <Select
-                labelId="demo-simple-select-standard-label"
-                id="demo-simple-select-standard"
-                
-              variant="filled"
-                value={type}
-                onChange={typeHandler}
-                label="Type"
-              >
-                {arrayTypesForRender.map((item: any) => (
-                  <MenuItem value={item.id}>{item.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </ListItem>
-        </List>
-      </Box>
-
-      <ListItem>
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<CloudUploadIcon />}
-          disabled={!!previewImage}
-        >
-          Upload Image
-          <VisuallyHiddenInput
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-        </Button>
-      </ListItem>
-
-      <ListItem>
-        <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
-        >
-          {previewImage && (
-            <Box
-              sx={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '500px',
-                border: '1px dashed #ccc',
-                borderRadius: '4px',
-                padding: 1,
-              }}
-            >
-              <IconButton
-                aria-label="remove image"
-                onClick={clearImage}
-                sx={{
-                  position: 'absolute',
-                  right: 8,
-                  top: 8,
-                  backgroundColor: 'rgba(255,255,255,0.7)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.9)',
+                value={goodInfo?.article}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">article:</InputAdornment>
+                    ),
                   },
                 }}
-              >
-                <CancelIcon color="error" />
-              </IconButton>
+              />
 
-              <img
-                src={previewImage}
-                alt="Preview"
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  maxHeight: '400px',
-                  objectFit: 'contain',
-                  display: 'block',
+              <ListItem></ListItem> 
+
+    <Divider>
+    <Chip size="small" label='Name'/>
+  </Divider>
+   <ListItem></ListItem> 
+
+              <TextField
+                fullWidth
+                variant="standard"
+                id="outlined-basic"
+                //   label="Name de"
+                placeholder="Name de"
+                name="name_de"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.name_de}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">DE:</InputAdornment>
+                    ),
+                  },
                 }}
               />
 
-              {selectedFile && (
-                <Box
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Name en"
+                placeholder="Name en"
+                name="name_en"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.name_en}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">EN:</InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Name ru"
+                placeholder="Name ru"
+                name="name_ru"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.name_ru}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">RU:</InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              <ListItem></ListItem> 
+
+    <Divider>
+    <Chip size="small" label='Short description'/>
+  </Divider>
+   <ListItem></ListItem> 
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Short Description De"
+                placeholder="Short Description De"
+                name="description_short_de"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_short_de}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                         DE:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Short Description En"
+                placeholder="Short Description En"
+                name="description_short_en"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_short_en}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        EN:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Short Description Ru"
+                placeholder="Short Description Ru"
+                name="description_short_ru"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_short_ru}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        RU:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+    <ListItem></ListItem> 
+    <Divider>
+    <Chip  size="small" label='Long description'/>
+  </Divider>
+   <ListItem></ListItem> 
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Long Description De"
+                placeholder="Long Description De"
+                name="description_long_de"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_long_de}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        DE:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Long Description En"
+                placeholder="Long Description En"
+                name="description_long_en"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_long_en}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                      EN:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <TextField
+                id="outlined-basic"
+                fullWidth
+                variant="standard"
+                //   label="Long Description Ru"
+                placeholder="Long Description Ru"
+                name="description_long_ru"
+                //   variant="standard"
+                required
+                onChange={handleAllInput}
+                value={goodInfo?.description_long_ru}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                      RU:
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <ListItem></ListItem>     
+              <ListItem></ListItem>     
+
+              <FormControl
+                fullWidth
+
+              
+              >
+                {/* <InputLabel htmlFor="standard-adornment-amount">
+                Price eu
+              </InputLabel> */}
+                <Input
+                  id="standard-adornment-amount"
+                  name="price_eu"
+                  // variant="filled"
+                  required
+                  onChange={handleAllInput}
+                  value={goodInfo?.price_eu}
+                  startAdornment={
+                    <InputAdornment position="start">price €:</InputAdornment>
+                  }
+                />
+              </FormControl>
+
+              <ListItem></ListItem> 
+
+           
+              <FormControl
+                // variant="standard"
+                fullWidth
+                sx={{ minWidth: 180 }}
+              >
+                {/* <InputLabel id="demo-simple-select-standard-label">
+                Type
+              </InputLabel> */}
+                <Select
+                
+                  labelId="demo-simple-select-standard-label"
+                  id="demo-simple-select-standard"
+                  variant="standard"
+                  value={type}
+                  onChange={typeHandler}
+                  label="Type"
+                >
+                  {arrayTypesForRender.map((item: any) => (
+                    <MenuItem value={item.id}>{item.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            
+          </List>
+        </Box>
+
+
+
+<Box sx={itemInSectionBox}>
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            disabled={!!previewImage}
+          >
+            Upload Image
+            <VisuallyHiddenInput
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </Button>
+          </Box>
+
+<Box sx={sectionBox}>
+
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
+          >
+            {previewImage && (
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '500px',
+                  border: '1px dashed #ccc',
+                  borderRadius: '4px',
+                  padding: 1,
+                }}
+              >
+                <IconButton
+                  aria-label="remove image"
+                  onClick={clearImage}
                   sx={{
-                    mt: 1,
-                    fontSize: '0.8rem',
-                    color: '#666',
-                    textAlign: 'center',
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    backgroundColor: 'rgba(255,255,255,0.7)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.9)',
+                    },
                   }}
                 >
-                  {selectedFile.name} • {(selectedFile.size / 1024).toFixed(1)}{' '}
-                  KB
-                </Box>
-              )}
-            </Box>
-          )}
-        </Box>
-      </ListItem>
+                  <CancelIcon color="error" />
+                </IconButton>
 
-      <ListItem>
-        <Box component="section" sx={{ m: 1 }}>
-          <Button variant="contained" onClick={saveBtnHandler} color="success">
-            Save good
-          </Button>
-        </Box>
-      </ListItem>
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: '400px',
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
+
+                {selectedFile && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      fontSize: '0.8rem',
+                      color: '#666',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {selectedFile.name} •{' '}
+                    {(selectedFile.size / 1024).toFixed(1)} KB
+                  </Box>
+                )}
+              </Box>
+              
+            )}
+          </Box>
+          </Box>
+
+        
+
+          <Box  sx={sectionBox }>
+            <Button
+              variant="contained"
+              onClick={saveBtnHandler}
+              color="success"
+              sx={{width: 200}}
+            >
+              Save good
+            </Button>
+          </Box>
+
+
+      </Box>
 
       <div>
         <Modal

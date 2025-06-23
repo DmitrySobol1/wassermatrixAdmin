@@ -9,10 +9,6 @@ import NavMenu from '../../components/NavMenu/NavMenu';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
@@ -48,7 +44,7 @@ export const Goods: FC = () => {
     const fetchGoodsTypesInfo = async () => {
       try {
         const types = await axios.get('/user_get_goodsstype');
-        const goods = await axios.get('/user_get_goods');
+        const goods = await axios.get('/admin_get_goods');
 
         console.log('GOODS=', goods);
 
@@ -157,21 +153,18 @@ export const Goods: FC = () => {
     setGoodName(goodName);
     setIdToDelete(goodId);
     setOpenModal(true);
-    
   }
 
   async function modalYesBtnHandler() {
-
-    
-
     try {
+      console.log('idToDelete=', idToDelete);
 
-      console.log('idToDelete=',idToDelete)
-      
-      const deleteResult = await axios.post('/admin_delete_good', {id:idToDelete});
+      const deleteResult = await axios.post('/admin_delete_good', {
+        id: idToDelete,
+      });
 
       if (deleteResult.data.status === 'ok') {
-        const goods = await axios.get('/user_get_goods');
+        const goods = await axios.get('/admin_get_goods');
 
         //@ts-ignore
         const arrayGoodsForRender = goods.data.map((item) => ({
@@ -195,115 +188,230 @@ export const Goods: FC = () => {
     }
   }
 
+  const wrapperBox = {
+    // bgcolor: 'grey',
+    margin: 'auto',
+    width: '90%',
+    minWidth: 400,
+    pt: 5,
+  };
+
+  const sectionBox = {
+    mb: 5,
+  };
+
+  const itemInSectionBox = {
+    mb: 3,
+  };
+
   return (
     <>
       <NavMenu />
 
-      <Box component="section" sx={{ p: 5 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleSharpIcon />}
-          //  onClick={()=>navigate('/add_new_good-page')}>
-          onClick={() => navigate('/add_new_good-page')}
-        >
-          Добавить новый товар
-        </Button>
-      </Box>
+      <Box sx={wrapperBox}>
+        <Box sx={sectionBox}>
+          <Typography variant="h4" component="h4">
+            Goods settings
+          </Typography>
+        </Box>
 
-      <Box component="section" sx={{ p: 3 }}>
-        {/* <Typography variant="h5" gutterBottom>
-          Фильтровать товары:{' '}
-          <Tooltip title="Управление фильтрами" arrow>
-            <SettingsIcon color="primary" onClick={()=>navigate('/filters-page')}/>
-          </Tooltip>
-        </Typography> */}
-        <Stack direction="row" spacing={1}>
-          {arrayTypesForRender.map((type: any) => (
-            <Chip
-              key={type.id}
-              label={type.name}
-              variant={selectedChipId === type.id ? 'filled' : 'outlined'}
-              color="primary"
-              clickable
-              onClick={() => typePressedHandler(type.id)}
-            >
-              {type.name}
-            </Chip>
-          ))}
-          
-          <Tooltip title="Edit filters" arrow>
-            <SettingsIcon color="primary" onClick={()=>navigate('/filters-page')}/>
-          </Tooltip>
-          
-        </Stack>
-        
-      </Box>
+        <Box sx={sectionBox}>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleSharpIcon />}
+            //  onClick={()=>navigate('/add_new_good-page')}>
+            onClick={() => navigate('/add_new_good-page')}
+          >
+            Добавить новый товар
+          </Button>
+        </Box>
 
-      
+        <Box sx={itemInSectionBox}>
+          <Stack direction="row" spacing={1}>
+            {arrayTypesForRender.map((type: any) => (
+              <Chip
+                key={type.id}
+                label={type.name}
+                variant={selectedChipId === type.id ? 'filled' : 'outlined'}
+                color="primary"
+                clickable
+                onClick={() => typePressedHandler(type.id)}
+              >
+                {type.name}
+              </Chip>
+            ))}
 
-      <Box component="section" sx={{ p: 3 }}>
-        <Stack direction="column" spacing={5}>
-          {arrayGoodsForRender.map((item: any) => (
-            <Card sx={{ display: 'flex' }} key={item.id}>
-              <CardMedia
-                component="img"
-                sx={{ width: 151 }}
-                image={item.img}
-                alt="Live from space album cover"
+            <Tooltip title="Edit filters" arrow>
+              <SettingsIcon
+                color="primary"
+                onClick={() => navigate('/filters-page')}
               />
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flex: '1 0 auto' }}>
-                  <div style={{ display: 'flex' }}>
-                    <Typography component="div" variant="h5" sx={{ mr: 1 }}>
-                      {item.name}
+            </Tooltip>
+          </Stack>
+        </Box>
+
+<Box sx={sectionBox}>
+        {arrayGoodsForRender.map((item: any) => (
+          <Stack
+            spacing={2}
+            direction="row"
+            sx={{
+              border: 1,
+              p: 1,
+              mb: 2,
+              borderRadius: 3,
+              borderColor: 'lightgrey',
+            }}
+          >
+            <Box>
+              <img
+                src={item.img}
+                style={{ width: 100, height: 100, borderRadius: 10 }}
+              />
+            </Box>
+
+            <Box>
+              <div style={{ display: 'flex' }}>
+                <Typography component="div" variant="h6" sx={{ mr: 1 }}>
+                  {item.name}
+                </Typography>
+
+                <Chip
+                  label={arrayTypesForGoodTable[item.type]}
+                  variant="outlined"
+                  size="small"
+                />
+              </div>
+              <Typography
+                variant="body1"
+                component="div"
+                sx={{ color: 'text.secondary' }}
+              >
+                {item.description_short}
+              </Typography>
+
+              <Typography
+                variant="body1"
+                component="div"
+                sx={{ color: 'text.primary', mt: 1 }}
+              >
+                {item.description_long}
+              </Typography>
+
+              <Tooltip title="Edit item">
+                <IconButton
+                  aria-label="edit"
+                  color="primary"
+                  onClick={() => editBtnHandler(item.id)}
+                >
+                  <EditIcon />{' '}
+                  <Typography component="div" variant="body1" sx={{ mr: 1 }}>
+                    EDIT
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete item">
+                <IconButton
+                  aria-label="delete"
+                  sx={{ color: red[500] }}
+                  onClick={() => deleteBtnHandler(item.id, item.name)}
+                >
+                  <DeleteForeverIcon />{' '}
+                  <Typography component="div" variant="body1" sx={{ mr: 1 }}>
+                    DELETE
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Stack>
+        ))}
+
+        </Box>
+
+
+       
+        {/* <Box sx={itemInSectionBox}>
+          <Stack direction="column" spacing={3}>
+            {arrayGoodsForRender.map((item: any) => (
+              <Card sx={{ display: 'flex' }} key={item.id}>
+                <CardMedia
+                  component="img"
+                  sx={{ width: 100, height: 100 }}
+                  image={item.img}
+                  alt="Live from space album cover"
+                />
+
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flex: '1 0 auto' }}>
+                    <div style={{ display: 'flex' }}>
+                      <Typography component="div" variant="h6" sx={{ mr: 1 }}>
+                        {item.name}
+                      </Typography>
+
+                      <Chip
+                        label={arrayTypesForGoodTable[item.type]}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </div>
+
+                    <Typography
+                      variant="body1"
+                      component="div"
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      {item.description_short}
                     </Typography>
 
-                    <Chip
-                      label={arrayTypesForGoodTable[item.type]}
-                      variant="outlined"
-                      size="small"
-                    />
-                  </div>
+                    <Typography
+                      variant="body1"
+                      component="div"
+                      sx={{ color: 'text.primary', mt: 1 }}
+                    >
+                      {item.description_long}
+                    </Typography>
+                  </CardContent>
 
-                  <Typography
-                    variant="subtitle1"
-                    component="div"
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    {item.description_short}
-                  </Typography>
-                  <Typography
-                    variant="subtitle2"
-                    component="div"
-                    sx={{ color: 'text.secondary', mt: 1 }}
-                  >
-                    {item.description_long}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Tooltip title="Edit item">
-                    <IconButton
-                      aria-label="edit"
-                      color="primary"
-                      onClick={() => editBtnHandler(item.id)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete item">
-                    <IconButton
-                      aria-label="edit"
-                      sx={{ color: red[500] }}
-                      onClick={() => deleteBtnHandler(item.id, item.name)}
-                    >
-                      <DeleteForeverIcon />
-                    </IconButton>
-                  </Tooltip>
-                </CardActions>
-              </Box>
-            </Card>
-          ))}
-        </Stack>
+                  <CardActions>
+                    <Tooltip title="Edit item">
+                      <IconButton
+                        aria-label="edit"
+                        color="primary"
+                        onClick={() => editBtnHandler(item.id)}
+                      >
+                        <EditIcon />{' '}
+                        <Typography
+                          component="div"
+                          variant="body1"
+                          sx={{ mr: 1 }}
+                        >
+                          EDIT
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete item">
+                      <IconButton
+                        aria-label="edit"
+                        sx={{ color: red[500] }}
+                        onClick={() => deleteBtnHandler(item.id, item.name)}
+                      >
+                        <DeleteForeverIcon />{' '}
+                        <Typography
+                          component="div"
+                          variant="body1"
+                          sx={{ mr: 1 }}
+                        >
+                          DELETE
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                </Box>
+              </Card>
+            ))}
+          </Stack>
+        </Box> */}
+
       </Box>
 
       <div>
@@ -318,10 +426,19 @@ export const Goods: FC = () => {
               Are you sure you want to delete {goodName} ?
             </Typography>
             <Box sx={{ mt: 2 }}>
-              <Button variant="contained" onClick={modalYesBtnHandler} color="error" sx={{ mr: 2 }}>
+              <Button
+                variant="contained"
+                onClick={modalYesBtnHandler}
+                color="error"
+                sx={{ mr: 2 }}
+              >
                 Yes, delete
               </Button>
-              <Button variant="contained" onClick={() => setOpenModal(false)} color="success">
+              <Button
+                variant="contained"
+                onClick={() => setOpenModal(false)}
+                color="success"
+              >
                 No, leave item alone
               </Button>
             </Box>

@@ -13,13 +13,11 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import ListItem from '@mui/material/ListItem';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -28,10 +26,10 @@ export const Filters: FC = () => {
 
   const [arrayTypesForRender, setArrayTypesForRender] = useState([]);
   const [initialTypes, setInitialTypes] = useState([]);
-const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
-//   const language = 'en';
-//   const domen = import.meta.env.VITE_DOMEN;
+  //   const language = 'en';
+  //   const domen = import.meta.env.VITE_DOMEN;
 
   // получить список типов товаров + товары
   useEffect(() => {
@@ -85,30 +83,30 @@ const [openModal, setOpenModal] = useState(false);
     fetchGoodsTypesInfo();
   }, []);
 
-//   function typePressedHandler(typeId: string) {
-//     //@ts-ignore
-//     setSelectedChipId(typeId);
-//     console.log('typeId=', typeId);
+  //   function typePressedHandler(typeId: string) {
+  //     //@ts-ignore
+  //     setSelectedChipId(typeId);
+  //     console.log('typeId=', typeId);
 
-//     //@ts-ignore
-//     if (typeId == '1') {
-//       setArrayGoodsForRender(allGoods);
-//       return;
-//     }
+  //     //@ts-ignore
+  //     if (typeId == '1') {
+  //       setArrayGoodsForRender(allGoods);
+  //       return;
+  //     }
 
-//     //@ts-ignore
-//     let newArray = [];
+  //     //@ts-ignore
+  //     let newArray = [];
 
-//     allGoods.map((item) => {
-//       //@ts-ignore
-//       if (item.type === typeId) {
-//         //@ts-ignore
-//         newArray = [item, ...newArray];
-//       }
-//     });
-//     //@ts-ignore
-//     setArrayGoodsForRender(newArray);
-//   }
+  //     allGoods.map((item) => {
+  //       //@ts-ignore
+  //       if (item.type === typeId) {
+  //         //@ts-ignore
+  //         newArray = [item, ...newArray];
+  //       }
+  //     });
+  //     //@ts-ignore
+  //     setArrayGoodsForRender(newArray);
+  //   }
 
   //@ts-ignore
   function editBtnHandler(goodId) {
@@ -131,11 +129,11 @@ const [openModal, setOpenModal] = useState(false);
     p: 4,
   };
 
-//   function deleteBtnHandler(goodId, goodName) {
-//     setGoodName(goodName);
-//     setIdToDelete(goodId);
-//     setOpenModal(true);
-//   }
+  //   function deleteBtnHandler(goodId, goodName) {
+  //     setGoodName(goodName);
+  //     setIdToDelete(goodId);
+  //     setOpenModal(true);
+  //   }
 
   //   async function modalYesBtnHandler() {
   //     try {
@@ -170,8 +168,8 @@ const [openModal, setOpenModal] = useState(false);
   //     }
   //   }
 
-  function inputHandler(e:any) {
-    const newArray = arrayTypesForRender.map((item:any) => {
+  function inputHandler(e: any) {
+    const newArray = arrayTypesForRender.map((item: any) => {
       const name = e.target.name;
       console.log('name', name);
       if (item.id === e.target.id) {
@@ -209,53 +207,63 @@ const [openModal, setOpenModal] = useState(false);
     setOpenModal(false);
   }
 
+  const wrapperBox = {
+    // bgcolor: 'grey',
+    margin: 'auto',
+    width: '90%',
+    minWidth: 400,
+    pt: 5,
+  };
+
+  const sectionBox = {
+    mb: 5,
+  };
+
+  // const itemInSectionBox = {
+  //   mb: 3,
+  // };
+
   return (
     <>
       <NavMenu />
 
-      <ListItem>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/goods-page')}
-        >
-          back
-        </Button>
-      </ListItem>
+      <Box sx={wrapperBox}>
+        <Box sx={sectionBox}>
+          <Button
+            //   variant="contained"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/goods-page')}
+          >
+            back
+          </Button>
+        </Box>
 
-<ListItem>
-      <Box component="section" sx={{mt:5}}>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleSharpIcon />}
-          //  onClick={()=>navigate('/add_new_good-page')}>
-          onClick={() => navigate('/filters_addnew-page')}
-        >
-          Add new filter type
-        </Button>
-      </Box>
-      </ListItem>
+        <Box sx={sectionBox}>
+          <Typography variant="h4" component="h4">
+            List of filters types:{' '}
+          </Typography>
+        </Box>
 
-<ListItem>
-      <Box sx={{mt:5}}>
-        <Typography variant="h5" gutterBottom>
-          List of filters types:{' '}
-        </Typography>
-      </Box>
-</ListItem>
+        <Box sx={sectionBox}>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleSharpIcon />}
+            //  onClick={()=>navigate('/add_new_good-page')}>
+            onClick={() => navigate('/filters_addnew-page')}
+          >
+            Add new filter type
+          </Button>
+        </Box>
 
-<ListItem>
-      <Box component="section" >
-        <Stack direction="column" spacing={5}>
-          {arrayTypesForRender.map((item: any) => (
-            <Card  key={item.id}>
+        <Box sx={sectionBox}>
+          <Stack direction="column" spacing={3}>
+            {arrayTypesForRender.map((item: any) => (
               
-              
-                <CardContent >
-                  
-                  <Box>
+              <Card key={item.id}>
+                <CardContent>
                   <TextField
                     // key={item.id}
+                    fullWidth
                     name="name_de"
                     id={item.id}
                     onChange={(e) => inputHandler(e)}
@@ -263,18 +271,15 @@ const [openModal, setOpenModal] = useState(false);
                     slotProps={{
                       input: {
                         startAdornment: (
-                          <InputAdornment position="start">
-                            DE:
-                          </InputAdornment>
+                          <InputAdornment position="start">DE:</InputAdornment>
                         ),
                       },
                     }}
                     variant="standard"
                   />
-                  </Box>
 
-                <Box>
                   <TextField
+                    fullWidth
                     // key={item.id}
                     name="name_en"
                     id={item.id}
@@ -283,19 +288,15 @@ const [openModal, setOpenModal] = useState(false);
                     slotProps={{
                       input: {
                         startAdornment: (
-                          <InputAdornment position="start">
-                            EN:
-                          </InputAdornment>
+                          <InputAdornment position="start">EN:</InputAdornment>
                         ),
                       },
                     }}
                     variant="standard"
                   />
-                  </Box>
-
-                  <Box>
 
                   <TextField
+                    fullWidth
                     // key={item.id}
                     name="name_ru"
                     id={item.id}
@@ -304,63 +305,63 @@ const [openModal, setOpenModal] = useState(false);
                     slotProps={{
                       input: {
                         startAdornment: (
-                          <InputAdornment position="start">
-                            RU:
-                          </InputAdornment>
+                          <InputAdornment position="start">RU:</InputAdornment>
                         ),
                       },
                     }}
                     variant="standard"
                   />
-                  </Box>
                 </CardContent>
-              
-            </Card>
-          ))}
-        </Stack>
-      </Box>
-
-      </ListItem>
-
-      <ListItem>
-        <Box component="section" sx={{ mt: 3 }}>
-          <Button variant="contained" onClick={saveBtnHandler} color="success">
-            Save changes
-          </Button>
+              </Card>
+            ))}
+          </Stack>
         </Box>
-      </ListItem>
 
-      <div>
-        <Modal
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={modalStyle}>
-            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-              Are you sure you want to save all changes?
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              <Button
-                variant="contained"
-                onClick={modalYesBtnHandler}
-                color="success"
-                sx={{ mr: 2 }}
-              >
-                Yes, save
-              </Button>
-              <Button
-                variant="contained"
-                onClick={modalNoBtnHandler}
-                color="error"
-              >
-                No, cancel changes
-              </Button>
-            </Box>
+        
+          <Box component="section" sx={sectionBox}>
+            <Button
+              variant="contained"
+              onClick={saveBtnHandler}
+              color="success"
+              sx={{width: 200}}
+            >
+              Save changes
+            </Button>
           </Box>
-        </Modal>
-      </div>
+        
+
+        <div>
+          <Modal
+            open={openModal}
+            onClose={() => setOpenModal(false)}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={modalStyle}>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                Are you sure you want to save all changes?
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={modalYesBtnHandler}
+                  color="success"
+                  sx={{ mr: 2 }}
+                >
+                  Yes, save
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={modalNoBtnHandler}
+                  color="error"
+                >
+                  No, cancel changes
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+        </div>
+      </Box>
     </>
   );
 };

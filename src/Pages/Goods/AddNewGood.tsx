@@ -27,8 +27,7 @@ import Typography from '@mui/material/Typography';
 // import { useNavigate } from 'react-router-dom';
 
 export const AddNewGood: FC = () => {
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate();
 
   const [allInputDatas, setAllInputDatas] = useState({
     article: '',
@@ -206,194 +205,222 @@ export const AddNewGood: FC = () => {
     allInputDatas.description_long_ru = '';
     allInputDatas.price_eu = '';
     allInputDatas.type = '';
-    setType('')
+    setType('');
     setPreviewImage(null);
     setSelectedFile(null);
   }
 
+  const wrapperBox = {
+    // bgcolor: 'grey',
+    margin: 'auto',
+    width: '90%',
+    minWidth: 400,
+    pt: 5,
+  };
+
+  const sectionBox = {
+    mb: 5,
+  };
+
+  const itemInSectionBox = {
+    mb: 3,
+  };
+
   return (
     <>
       <NavMenu />
-      <Box
-        component="form"
-        sx={{ '& > :not(style)': { m: 1, } }}
-        noValidate
-        autoComplete="off"
-      >
-        <List>
 
-            <ListItem>
-                <Button variant="contained" startIcon={<ArrowBackIcon />} onClick={()=>navigate('/goods-page')}>
-                    back
-              </Button>
+      <Box component="form" sx={wrapperBox} noValidate autoComplete="off">
+        <Box sx={sectionBox}>
+          <Button
+            // variant="contained"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/goods-page')}
+          >
+            back
+          </Button>
+        </Box>
 
-            </ListItem>
+        <Box sx={itemInSectionBox}>
+          <Typography variant="h4" gutterBottom>
+            Add new good
+          </Typography>
+        </Box>
 
-<ListItem>
-            <Typography variant="h4" gutterBottom>
-        Add new good
-      </Typography>
-      </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Article"
-              name="article"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.article}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Name de"
-              name="name_de"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.name_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Name en"
-              name="name_en"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.name_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Name ru"
-              name="name_ru"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.name_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Short Description De"
-              name="description_short_de"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_short_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Short Description En"
-              name="description_short_en"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_short_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Short Description Ru"
-              name="description_short_ru"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_short_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Long Description De"
-              name="description_long_de"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_long_de}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Long Description En"
-              name="description_long_en"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_long_en}
-            />
-          </ListItem>
-
-          <ListItem>
-            <TextField
-              id="outlined-basic"
-              label="Long Description Ru"
-              name="description_long_ru"
-              variant="standard"
-              required
-              onChange={handleAllInput}
-              value={allInputDatas.description_long_ru}
-            />
-          </ListItem>
-
-          <ListItem>
-            <FormControl fullWidth variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">
-                Price eu
-              </InputLabel>
-              <Input
-                id="standard-adornment-amount"
-                name="price_eu"
+        <Box sx={itemInSectionBox}>
+          <List  >
+            
+            <ListItem >
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Article"
+                name="article"
+                variant="standard"
                 required
                 onChange={handleAllInput}
-                value={allInputDatas.price_eu}
-                startAdornment={
-                  <InputAdornment position="start">€</InputAdornment>
-                }
+                value={allInputDatas.article}
               />
-            </FormControl>
-          </ListItem>
+            </ListItem>
 
-          <ListItem>
-            <FormControl variant="standard" sx={{ minWidth: 180 }}>
-              <InputLabel id="demo-simple-select-standard-label">
-                Type
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-standard-label"
-                id="demo-simple-select-standard"
-                value={type}
-                onChange={typeHandler}
-                label="Type"
-              >
-                {arrayTypesForRender.map((item: any) => (
-                  <MenuItem value={item.id}>{item.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </ListItem>
-        </List>
-      </Box>
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Name de"
+                name="name_de"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.name_de}
+              />
+            </ListItem>
 
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Name en"
+                name="name_en"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.name_en}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Name ru"
+                name="name_ru"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.name_ru}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Short Description De"
+                name="description_short_de"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_short_de}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Short Description En"
+                name="description_short_en"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_short_en}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Short Description Ru"
+                name="description_short_ru"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_short_ru}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Long Description De"
+                name="description_long_de"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_long_de}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Long Description En"
+                name="description_long_en"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_long_en}
+              />
+            </ListItem>
+
+            <ListItem>
+              <TextField
+              fullWidth
+                id="outlined-basic"
+                label="Long Description Ru"
+                name="description_long_ru"
+                variant="standard"
+                required
+                onChange={handleAllInput}
+                value={allInputDatas.description_long_ru}
+              />
+            </ListItem>
+
+            <ListItem>
+              <FormControl fullWidth variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Price eu
+                </InputLabel>
+                <Input
+                  id="standard-adornment-amount"
+                  name="price_eu"
+                  required
+                  onChange={handleAllInput}
+                  value={allInputDatas.price_eu}
+                  startAdornment={
+                    <InputAdornment position="start">€</InputAdornment>
+                  }
+                />
+              </FormControl>
+            </ListItem>
+
+            <ListItem>
+              <FormControl variant="standard" sx={{ minWidth: 180 }} fullWidth>
+                <InputLabel id="demo-simple-select-standard-label" >
+                  Type
+                </InputLabel>
+                <Select
+                
+                  labelId="demo-simple-select-standard-label"
+                  id="demo-simple-select-standard"
+                  value={type}
+                  onChange={typeHandler}
+                  label="Type"
+                >
+                  {arrayTypesForRender.map((item: any) => (
+                    <MenuItem value={item.id}>{item.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </ListItem>
+          </List>
+        </Box>
+      
+ <Box component="section" sx={sectionBox}>
       <ListItem>
         <Button
           component="label"
@@ -409,6 +436,7 @@ export const AddNewGood: FC = () => {
           />
         </Button>
       </ListItem>
+      
       <ListItem>
         <Box
           sx={{
@@ -474,14 +502,17 @@ export const AddNewGood: FC = () => {
           )}
         </Box>
       </ListItem>
+      </Box>
 
+        <Box component="section" sx={sectionBox}>
       <ListItem>
-        <Box component="section" sx={{ m: 1 }}>
-          <Button variant="contained" onClick={saveBtnHandler} color="success">
+          <Button variant="contained" onClick={saveBtnHandler} color="success" sx={{width:200}}>
             Save good
           </Button>
-        </Box>
       </ListItem>
+        </Box>
+     
+      </Box>
 
       <div>
         <Modal

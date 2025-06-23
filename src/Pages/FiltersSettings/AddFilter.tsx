@@ -89,36 +89,59 @@ export const AddFilter: FC = () => {
     setOpenModal(false);
   }
 
+
+  const wrapperBox = {
+    // bgcolor: 'grey',
+    margin: 'auto',
+    width: '90%',
+    minWidth: 400,
+    pt: 5,
+  };
+
+  const sectionBox = {
+    mb: 5,
+  };
+
+  const itemInSectionBox = {
+    mb: 3,
+  };
+
+
   return (
     <>
       <NavMenu />
 
-      <ListItem>
+      <Box sx={wrapperBox}>
+
+      <Box sx={sectionBox}>
         <Button
-          variant="contained"
+        //   variant="contained"
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/filters-page')}
         >
           back
         </Button>
-      </ListItem>
+        </Box>
+      
 
-      <ListItem>
-        <Box sx={{ mt: 5 }}>
-          <Typography variant="h5" gutterBottom>
+      
+        <Box sx={sectionBox}>
+          <Typography variant="h4" component="h4">
             Add new filter:{' '}
           </Typography>
         </Box>
-      </ListItem>
+      
 
-      <ListItem>
-        <Box component="section">
-          <Stack direction="column" spacing={5}>
+      
+        <Box sx={sectionBox}>
+          
+          
             <Card>
               <CardContent>
-                <Box>
+                
                   <TextField
                     // key={item.id}
+                    fullWidth
                     name="name_de"
                     // id={item.id}
                     onChange={(e) => inputHandler(e)}
@@ -132,10 +155,11 @@ export const AddFilter: FC = () => {
                     }}
                     variant="standard"
                   />
-                </Box>
+                
 
-                <Box>
+                
                   <TextField
+                  fullWidth
                     // key={item.id}
                     name="name_en"
                     // id={item.id}
@@ -150,10 +174,9 @@ export const AddFilter: FC = () => {
                     }}
                     variant="standard"
                   />
-                </Box>
 
-                <Box>
                   <TextField
+                  fullWidth
                     // key={item.id}
                     name="name_ru"
                     // id={item.id}
@@ -168,20 +191,20 @@ export const AddFilter: FC = () => {
                     }}
                     variant="standard"
                   />
-                </Box>
               </CardContent>
             </Card>
-          </Stack>
+          
         </Box>
-      </ListItem>
+     
 
-      <ListItem>
-        <Box component="section" sx={{ mt: 3 }}>
-          <Button variant="contained" onClick={saveBtnHandler} color="success">
+        <Box component="section" sx={sectionBox}>
+          <Button variant="contained" onClick={saveBtnHandler} color="success" sx={{width:200}}>
             Add filter to app
           </Button>
         </Box>
-      </ListItem>
+
+
+      </Box>
 
       <div>
         <Modal

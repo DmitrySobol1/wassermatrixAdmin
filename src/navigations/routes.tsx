@@ -8,6 +8,7 @@ import { AddNewGood } from '../Pages/Goods/AddNewGood';
 import { EditGood } from '../Pages/Goods/EditGood';
 import { Filters } from '../Pages/FiltersSettings/Filters';
 import { AddFilter } from '../Pages/FiltersSettings/AddFilter';
+import { Carts } from '../Pages/Carts/Carts';
 
 
 
@@ -27,6 +28,8 @@ export const routes: Route[] = [
   
   { path: '/filters-page', Component: Filters },
   { path: '/filters_addnew-page', Component: AddFilter },
+  
+  { path: '/carts-page', Component: Carts },
 //   { path: '/onboarding', Component: Onboarding, title: 'Onboarding' },
   
   

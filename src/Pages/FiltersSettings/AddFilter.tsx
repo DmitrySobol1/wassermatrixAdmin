@@ -7,13 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import NavMenu from '../../components/NavMenu/NavMenu';
 
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import ListItem from '@mui/material/ListItem';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -102,9 +100,9 @@ export const AddFilter: FC = () => {
     mb: 5,
   };
 
-  const itemInSectionBox = {
-    mb: 3,
-  };
+  // const itemInSectionBox = {
+  //   mb: 3,
+  // };
 
 
   return (

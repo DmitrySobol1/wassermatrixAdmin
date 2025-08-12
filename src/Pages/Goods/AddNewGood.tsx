@@ -23,6 +23,9 @@ import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
+
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -42,6 +45,9 @@ export const AddNewGood: FC = () => {
     description_long_ru: '',
     price_eu: '',
     type: '',
+    delivery_price_de: '',
+    delivery_price_inEu: '',
+    delivery_price_outEu: '',
   });
   const [type, setType] = useState('');
   //   const [file, setFile] = useState(null);
@@ -109,6 +115,9 @@ export const AddNewGood: FC = () => {
     data.append('description_long_en', allInputDatas.description_long_en);
     data.append('description_long_ru', allInputDatas.description_long_ru);
     data.append('price_eu', allInputDatas.price_eu);
+    data.append('delivery_price_de', allInputDatas.delivery_price_de);
+    data.append('delivery_price_inEu', allInputDatas.delivery_price_inEu);
+    data.append('delivery_price_outEu', allInputDatas.delivery_price_outEu);
     data.append('type', type);
     //@ts-ignore
     data.append('file', selectedFile);
@@ -205,6 +214,9 @@ export const AddNewGood: FC = () => {
     allInputDatas.description_long_ru = '';
     allInputDatas.price_eu = '';
     allInputDatas.type = '';
+    allInputDatas.delivery_price_de = '';
+    allInputDatas.delivery_price_inEu = '';
+    allInputDatas.delivery_price_outEu= '';
     setType('');
     setPreviewImage(null);
     setSelectedFile(null);
@@ -250,6 +262,12 @@ export const AddNewGood: FC = () => {
         <Box sx={itemInSectionBox}>
           <List  >
             
+             <ListItem></ListItem>   
+            <Divider>
+              <Chip size="small" label='Article'/>
+            </Divider>
+             <ListItem></ListItem> 
+
             <ListItem >
               <TextField
               fullWidth
@@ -262,6 +280,12 @@ export const AddNewGood: FC = () => {
                 value={allInputDatas.article}
               />
             </ListItem>
+
+            <ListItem></ListItem>   
+            <Divider>
+              <Chip size="small" label='Name'/>
+            </Divider>
+             <ListItem></ListItem> 
 
             <ListItem>
               <TextField
@@ -302,6 +326,12 @@ export const AddNewGood: FC = () => {
               />
             </ListItem>
 
+            <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Short description'/>
+                </Divider>
+             <ListItem></ListItem> 
+
             <ListItem>
               <TextField
               fullWidth
@@ -340,6 +370,12 @@ export const AddNewGood: FC = () => {
                 value={allInputDatas.description_short_ru}
               />
             </ListItem>
+
+              <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Long description'/>
+                </Divider>
+             <ListItem></ListItem> 
 
             <ListItem>
               <TextField
@@ -380,10 +416,16 @@ export const AddNewGood: FC = () => {
               />
             </ListItem>
 
+            <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Price and type'/>
+                </Divider>
+             <ListItem></ListItem> 
+
             <ListItem>
               <FormControl fullWidth variant="standard">
                 <InputLabel htmlFor="standard-adornment-amount">
-                  Price eu
+                  Good price EUR
                 </InputLabel>
                 <Input
                   id="standard-adornment-amount"
@@ -417,9 +459,77 @@ export const AddNewGood: FC = () => {
                 </Select>
               </FormControl>
             </ListItem>
+
+                  <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Delivery price'/>
+                </Divider>
+             <ListItem></ListItem> 
+
+            <ListItem>
+              <FormControl fullWidth variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Delivery price inside Germany
+                </InputLabel>
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_de"
+                  required
+                  onChange={handleAllInput}
+                  value={allInputDatas.delivery_price_de}
+                  startAdornment={
+                    <InputAdornment position="start">€</InputAdornment>
+                  }
+                />
+              </FormControl>
+            </ListItem>      
+
+            <ListItem>
+              <FormControl fullWidth variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Delivery price inside EU
+                </InputLabel>
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_inEu"
+                  required
+                  onChange={handleAllInput}
+                  value={allInputDatas.delivery_price_inEu}
+                  startAdornment={
+                    <InputAdornment position="start">€</InputAdornment>
+                  }
+                />
+              </FormControl>
+            </ListItem>      
+
+            <ListItem>
+              <FormControl fullWidth variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Delivery price outside EU
+                </InputLabel>
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_outEu"
+                  required
+                  onChange={handleAllInput}
+                  value={allInputDatas.delivery_price_outEu}
+                  startAdornment={
+                    <InputAdornment position="start">€</InputAdornment>
+                  }
+                />
+              </FormControl>
+            </ListItem>      
+
           </List>
         </Box>
       
+
+                    <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Image'/>
+                </Divider>
+             <ListItem></ListItem> 
+
  <Box component="section" sx={sectionBox}>
       <ListItem>
         <Button

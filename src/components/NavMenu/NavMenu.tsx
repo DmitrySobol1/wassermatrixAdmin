@@ -48,6 +48,28 @@ export default function NavMenu() {
 
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               <Link
+                href="#/orders-page"
+                underline="hover"
+                style={{ color: 'white'}}
+                
+              >
+                {'Orders'}
+              </Link>
+            </Typography>
+
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              <Link
+                href="#/countries-page"
+                underline="hover"
+                style={{ color: 'white'}}
+                
+              >
+                {'Countries'}
+              </Link>
+            </Typography>
+
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              <Link
                 href="#/sales-page"
                 underline="hover"
                 id="3"

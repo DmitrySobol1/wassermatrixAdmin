@@ -9,6 +9,9 @@ import { EditGood } from '../Pages/Goods/EditGood';
 import { Filters } from '../Pages/FiltersSettings/Filters';
 import { AddFilter } from '../Pages/FiltersSettings/AddFilter';
 import { Carts } from '../Pages/Carts/Carts';
+import { CountriesForDelivery } from '../Pages/CountriesForDelivery/CountriesForDelivery';
+import { AddCountry } from '../Pages/CountriesForDelivery/addCountry';
+import { Orders } from '../Pages/Orders/Orders';
 
 
 
@@ -29,7 +32,14 @@ export const routes: Route[] = [
   { path: '/filters-page', Component: Filters },
   { path: '/filters_addnew-page', Component: AddFilter },
   
+  { path: '/countries-page', Component: CountriesForDelivery },
+  { path: '/countries_addnew-page', Component: AddCountry },
+
+
   { path: '/carts-page', Component: Carts },
+  
+  { path: '/orders-page', Component: Orders },
+
 //   { path: '/onboarding', Component: Onboarding, title: 'Onboarding' },
   
   

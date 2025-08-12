@@ -75,6 +75,9 @@ export const EditGood: FC = () => {
           description_long_en: good.data.description_long_en,
           description_long_ru: good.data.description_long_ru,
           price_eu: good.data.price_eu,
+          delivery_price_de: good.data.delivery_price_de,
+          delivery_price_inEu: good.data.delivery_price_inEu,
+          delivery_price_outEu: good.data.delivery_price_outEu,
         };
 
         console.log('goodToRender', goodToRender);
@@ -128,6 +131,9 @@ export const EditGood: FC = () => {
     name_de?: string;
     name_ru?: string;
     price_eu?: number;
+    delivery_price_de?: number;
+    delivery_price_inEu?: number;
+    delivery_price_outEu?: number;
     article?: string;
     description_short_de: string;
     description_short_en: string;
@@ -169,6 +175,13 @@ export const EditGood: FC = () => {
     data.append('description_long_ru', goodInfo.description_long_ru);
     //@ts-ignore
     data.append('price_eu', goodInfo.price_eu);
+    //@ts-ignore
+    data.append('delivery_price_de', goodInfo.delivery_price_de);
+    //@ts-ignore
+    data.append('delivery_price_inEu', goodInfo.delivery_price_inEu);
+    //@ts-ignore
+    data.append('delivery_price_outEu', goodInfo.delivery_price_outEu);
+    
     data.append('type', type);
     //@ts-ignore
     data.append('file', selectedFile);
@@ -300,6 +313,11 @@ export const EditGood: FC = () => {
               </Typography>
             </Box>
 
+              <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Article'/>
+                </Divider>
+             <ListItem></ListItem> 
 
               <TextField
                 fullWidth
@@ -390,10 +408,10 @@ export const EditGood: FC = () => {
               />
               <ListItem></ListItem> 
 
-    <Divider>
-    <Chip size="small" label='Short description'/>
-  </Divider>
-   <ListItem></ListItem> 
+              <Divider>
+              <Chip size="small" label='Short description'/>
+            </Divider>
+            <ListItem></ListItem> 
 
               <TextField
                 id="outlined-basic"
@@ -461,11 +479,11 @@ export const EditGood: FC = () => {
                 }}
               />
 
-    <ListItem></ListItem> 
-    <Divider>
-    <Chip  size="small" label='Long description'/>
-  </Divider>
-   <ListItem></ListItem> 
+                    <ListItem></ListItem> 
+                    <Divider>
+                    <Chip  size="small" label='Long description'/>
+                  </Divider>
+                  <ListItem></ListItem> 
 
               <TextField
                 id="outlined-basic"
@@ -534,16 +552,19 @@ export const EditGood: FC = () => {
               />
 
               <ListItem></ListItem>     
-              <ListItem></ListItem>     
+              <ListItem></ListItem>   
+
+              <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Price and type'/>
+                </Divider>
+             <ListItem></ListItem>   
 
               <FormControl
                 fullWidth
 
               
               >
-                {/* <InputLabel htmlFor="standard-adornment-amount">
-                Price eu
-              </InputLabel> */}
                 <Input
                   id="standard-adornment-amount"
                   name="price_eu"
@@ -586,7 +607,63 @@ export const EditGood: FC = () => {
           </List>
         </Box>
 
+                  <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Delivery price'/>
+                </Divider>
+             <ListItem></ListItem>  
 
+
+             <FormControl fullWidth>
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_de"
+                  // variant="filled"
+                  required
+                  onChange={handleAllInput}
+                  value={goodInfo?.delivery_price_de}
+                  startAdornment={
+                    <InputAdornment position="start">delivery inside Germany, €:</InputAdornment>
+                  }
+                />
+              </FormControl>
+
+              <FormControl
+                fullWidth
+              >
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_inEu"
+                  // variant="filled"
+                  required
+                  onChange={handleAllInput}
+                  value={goodInfo?.delivery_price_inEu}
+                  startAdornment={
+                    <InputAdornment position="start">delivery inside EU,€:</InputAdornment>
+                  }
+                />
+              </FormControl>
+
+              <FormControl fullWidth>
+                <Input
+                  id="standard-adornment-amount"
+                  name="delivery_price_outEu"
+                  // variant="filled"
+                  required
+                  onChange={handleAllInput}
+                  value={goodInfo?.delivery_price_outEu}
+                  startAdornment={
+                    <InputAdornment position="start">delivery outside Germany,€:</InputAdornment>
+                  }
+                />
+              </FormControl>
+
+
+                  <ListItem></ListItem>   
+                <Divider>
+                  <Chip size="small" label='Image'/>
+                </Divider>
+             <ListItem></ListItem>  
 
 <Box sx={itemInSectionBox}>
           <Button

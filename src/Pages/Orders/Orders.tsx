@@ -34,7 +34,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import IconButton from '@mui/material/IconButton';
 
 export const Orders: FC = () => {
-  const [orders,setOrders] = useState([]);
+  // const [orders,setOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]); // Все заказы для фильтрации
   const [ordersForRender, setOrdersForRender] = useState([]); // Отображаемые заказы
   const [orderStatuses, setOrderStatuses] = useState([]);
@@ -54,7 +54,7 @@ export const Orders: FC = () => {
         const ordersData = ordersResponse.data.orders;
         
         //@ts-ignore
-        setOrders(ordersData);
+        // setOrders(ordersData);
         //@ts-ignore
         setAllOrders(ordersData);
         //@ts-ignore
@@ -169,7 +169,7 @@ export const Orders: FC = () => {
           );
 
         //@ts-ignore
-        setOrders(prevOrders => updateOrderInArray(prevOrders));
+        // setOrders(prevOrders => updateOrderInArray(prevOrders));
         //@ts-ignore
         setAllOrders(prevOrders => updateOrderInArray(prevOrders));
         //@ts-ignore

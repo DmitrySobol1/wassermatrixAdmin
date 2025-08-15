@@ -16,6 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -67,13 +68,15 @@ export const Orders: FC = () => {
         //@ts-ignore
         setOrderStatuses(statusesData);
 
-        // Создаем массив фильтров: All + статусы
+        // Создаем массив фильтров: All + статусы + фильтры по оплате
         const filtersArray = [
           { name: 'All', id: 'all' },
           ...statusesData.map((status: any) => ({
             name: status.name_en,
             id: status._id
-          }))
+          })),
+          { name: 'paid', id: 'paid', type: 'payment' },
+          { name: 'not paid', id: 'not_paid', type: 'payment' }
         ];
         
         //@ts-ignore
@@ -141,7 +144,28 @@ export const Orders: FC = () => {
       return;
     }
 
-    // Фильтруем заказы по выбранному статусу
+    // Фильтрация по статусу оплаты
+    if (filterId === 'paid') {
+      //@ts-ignore
+      const filteredOrders = allOrders.filter((order: any) => 
+        order.payStatus === true
+      );
+      //@ts-ignore
+      setOrdersForRender(filteredOrders);
+      return;
+    }
+
+    if (filterId === 'not_paid') {
+      //@ts-ignore
+      const filteredOrders = allOrders.filter((order: any) => 
+        order.payStatus === false
+      );
+      //@ts-ignore
+      setOrdersForRender(filteredOrders);
+      return;
+    }
+
+    // Фильтруем заказы по выбранному статусу заказа
     //@ts-ignore
     const filteredOrders = allOrders.filter((order: any) => 
       order.orderStatus?._id === filterId
@@ -186,6 +210,51 @@ export const Orders: FC = () => {
     }
   };
 
+  // Обработчик изменения даты доставки (ETA)
+  const handleEtaChange = async (orderId: string, newEta: string) => {
+    try {
+      // Находим текущий статус заказа
+      const currentOrder = ordersForRender.find((order: any) => order._id === orderId);
+      //@ts-ignore
+      const currentStatusId = currentOrder?.orderStatus?._id;
+
+      if (!currentStatusId) {
+        setSnackbarMessage('Error: Order status not found');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      const response = await axios.post('/admin_update_order_status', {
+        orderId: orderId,
+        statusId: currentStatusId,
+        eta: newEta
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем все массивы заказов
+        const updateOrderInArray = (orders: any[]) => 
+          orders.map((order: any) => 
+            order._id === orderId 
+              ? { ...order, eta: newEta }
+              : order
+          );
+
+        //@ts-ignore
+        setAllOrders(prevOrders => updateOrderInArray(prevOrders));
+        //@ts-ignore
+        setOrdersForRender(prevOrders => updateOrderInArray(prevOrders));
+
+        // Показываем уведомление
+        setSnackbarMessage('ETA date saved successfully');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении ETA:', error);
+      setSnackbarMessage('Error saving ETA date');
+      setSnackbarOpen(true);
+    }
+  };
+
   return (
     <>
       <NavMenu />
@@ -200,16 +269,27 @@ export const Orders: FC = () => {
         {/* Фильтры */}
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={1}>
-            {statusFilters.map((filter: any) => (
-              <Chip
-                key={filter.id}
-                label={filter.name}
-                variant={selectedFilterId === filter.id ? 'filled' : 'outlined'}
-                color="primary"
-                clickable
-                onClick={() => statusPressedHandler(filter.id)}
-              />
-            ))}
+            {statusFilters.map((filter: any) => {
+              let chipColor: "primary" | "error" | "success" | "info" | "warning" | "default" | "secondary" = "primary";
+              
+              // Устанавливаем цвета для фильтров оплаты
+              if (filter.id === 'paid') {
+                chipColor = "success";
+              } else if (filter.id === 'not_paid') {
+                chipColor = "error";
+              }
+
+              return (
+                <Chip
+                  key={filter.id}
+                  label={filter.name}
+                  variant={selectedFilterId === filter.id ? 'filled' : 'outlined'}
+                  color={chipColor}
+                  clickable
+                  onClick={() => statusPressedHandler(filter.id)}
+                />
+              );
+            })}
           </Stack>
         </Box>
 
@@ -230,12 +310,58 @@ export const Orders: FC = () => {
               <div style={{ display: 'block', width: '100%' }}>
                 <div>
                   <Typography component="div" variant="h6">
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 50, alignItems: 'center' }}>
                       
-                        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 5 }}>
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                           <AccountCircleIcon color="action" />
                           <span>User: {order.tlgid}</span>
                         </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          
+                          <Chip 
+                            label={order.payStatus ? 'paid' : 'not paid'}
+                            color={order.payStatus ? 'success' : 'error'}
+                            size="small"
+                            variant="filled"
+                          />
+                        </div>
+
+                        <div>
+                            <FormControl size="small" sx={{ minWidth: 120, border:1, borderRadius:30 }}>
+                              <Select
+                                value={order.orderStatus?._id || ''}
+                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                displayEmpty
+                                sx={{ fontSize: '0.875rem', borderRadius:30 }}
+                              >
+                                {orderStatuses.map((status: any) => (
+                                  <MenuItem key={status._id} value={status._id}>
+                                    {status.name_en}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                        </div>
+                             {order.orderStatus?.name_en === 'on the way' &&
+                                <div style={{ fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                  <span style={{ 
+                                    color: order.eta ? 'black' : 'red'
+                                  }}>
+                                    {order.eta ? 'estimate date of delivery:' : 'set estimate date of delivery:'}
+                                  </span>
+                                  <TextField
+                                    type="date"
+                                    value={order.eta || ''}
+                                    onChange={(e) => handleEtaChange(order._id, e.target.value)}
+                                    size="small"
+                                    sx={{ width: 150 }}
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                  />
+                                </div>
+                             }     
                     </div>
                   </Typography>
                 </div>
@@ -291,7 +417,7 @@ export const Orders: FC = () => {
                       Items: {order.qtyItemsInOrder} {'  '} |{'  '}{' '}
                       Total: {order.totalAmount.toFixed(2)} €
                     </span>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                    {/* <FormControl size="small" sx={{ minWidth: 120 }}>
                       <Select
                         value={order.orderStatus?._id || ''}
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
@@ -304,7 +430,7 @@ export const Orders: FC = () => {
                           </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>
+                    </FormControl> */}
                     
                   </Typography>
                 </div>

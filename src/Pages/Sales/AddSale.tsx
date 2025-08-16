@@ -95,7 +95,7 @@ export const AddSale: FC = () => {
 
         //@ts-ignore
         setArrayGoodsForRender(arrayTemp);
-        console.log('formattedGoods', arrayTemp);
+        // console.log('formattedGoods', arrayTemp);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       }
@@ -142,10 +142,11 @@ export const AddSale: FC = () => {
 
 
   async function saveBtnHandler() {
-    //  if (!file) {
-    //       setError('Please select a file');
-    //       return;
-    //     }
+    // Проверяем валидацию: если checkbox включен, то товар должен быть выбран
+    if (allInputDatas.isShowButton && !good) {
+      alert('Please choose an item when "Add available to redirect" is enabled');
+      return;
+    }
 
     const data = new FormData();
     data.append('title_de', allInputDatas.title_de);
@@ -165,6 +166,9 @@ export const AddSale: FC = () => {
     data.append('isShowButton', allInputDatas.isShowButton.toString());
     //@ts-ignore
     data.append('file', selectedFile);
+
+
+    
 
     try {
       const response = await axios.post('/admin_add_new_sale', data, {
@@ -626,7 +630,7 @@ export const AddSale: FC = () => {
             <ListItem>
                           <FormControl variant="standard" sx={{ minWidth: 180 }} fullWidth>
                             <InputLabel id="demo-simple-select-standard-label" >
-                              Choose item
+                              Choose item *
                             </InputLabel>
                             <Select
                             
@@ -657,8 +661,8 @@ export const AddSale: FC = () => {
 
           <ListItem>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>Recommended aspect ratio: 2,5 х 1</Typography>
-              <Typography variant="body2">Recommended image size: 1040px х 430px</Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>Recommended aspect ratio: 2,05 х 1</Typography>
+              <Typography variant="body2">Recommended image size: 1150px х 560px</Typography>
             </Box>
           </ListItem>
 

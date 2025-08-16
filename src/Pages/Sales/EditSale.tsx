@@ -193,6 +193,12 @@ export const EditSale: FC = () => {
 
   // Добавим backend endpoint для обновления акции
   async function saveBtnHandler() {
+    // Проверяем валидацию: если checkbox включен, то товар должен быть выбран
+    if (allInputDatas.isShowButton && !good) {
+      alert('Please choose an item when "Add available to redirect" is enabled');
+      return;
+    }
+
     const data = new FormData();
     data.append('id', saleId);
     data.append('title_de', allInputDatas.title_de);
@@ -657,7 +663,7 @@ export const EditSale: FC = () => {
             <ListItem>
               <FormControl variant="standard" sx={{ minWidth: 180 }} fullWidth>
                 <InputLabel id="demo-simple-select-standard-label" >
-                  Choose item
+                  Choose item *
                 </InputLabel>
                 <Select
                   labelId="demo-simple-select-standard-label"
@@ -684,8 +690,8 @@ export const EditSale: FC = () => {
 
         <ListItem>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Recommended aspect ratio: 2,5 х 1</Typography>
-            <Typography variant="body2">Recommended image size: 1040px х 430px</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Recommended aspect ratio: 2,05 х 1</Typography>
+            <Typography variant="body2">Recommended image size: 1150px х 560px</Typography>
           </Box>
         </ListItem>
 

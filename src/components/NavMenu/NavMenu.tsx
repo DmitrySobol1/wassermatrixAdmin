@@ -75,7 +75,7 @@ export default function NavMenu() {
                 id="3"
                 style={{ color: 'white'}}
               >
-                {'Акции'}
+                {'Special offers'}
               </Link>
             </Typography>
           </div>

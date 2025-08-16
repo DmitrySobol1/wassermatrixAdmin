@@ -653,7 +653,7 @@ export const EditGood: FC = () => {
                   onChange={handleAllInput}
                   value={goodInfo?.delivery_price_outEu}
                   startAdornment={
-                    <InputAdornment position="start">delivery outside Germany,€:</InputAdornment>
+                    <InputAdornment position="start">delivery outside EU,€:</InputAdornment>
                   }
                 />
               </FormControl>

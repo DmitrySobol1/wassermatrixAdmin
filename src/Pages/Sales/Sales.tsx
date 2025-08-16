@@ -225,7 +225,7 @@ export const Sales: FC = () => {
                   >
                     <Typography component="span" variant="body1" sx={{ color: 'text.secondary', mb: 1, mr: 3 }}>
                      date until: 
-                    </Typography> {item.dateUntil}
+                    </Typography> {new Date(item.dateUntil).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                   </Typography>
                 )}
 

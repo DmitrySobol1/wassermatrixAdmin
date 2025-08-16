@@ -177,9 +177,9 @@ export const EditSale: FC = () => {
     title_de: 35,
     title_en: 35,
     title_ru: 35,
-    subtitle_de: 80,
-    subtitle_en: 80,
-    subtitle_ru: 80,
+    subtitle_de: 40,
+    subtitle_en: 40,
+    subtitle_ru: 40,
     buttonText_de: 20,
     buttonText_en: 20,
     buttonText_ru: 20

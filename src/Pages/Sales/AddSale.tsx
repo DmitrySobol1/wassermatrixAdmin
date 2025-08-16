@@ -50,11 +50,9 @@ export const AddSale: FC = () => {
     
     
   });
-  const [type, setType] = useState('');
   const [good, setGood] = useState('');
   //   const [file, setFile] = useState(null);
 
-  const [arrayTypesForRender, setArrayTypesForRender] = useState([]);
   const [arrayGoodsForRender, setArrayGoodsForRender] = useState([]);
   
   // Состояния для отслеживания фокуса полей

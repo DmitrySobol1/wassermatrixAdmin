@@ -255,7 +255,7 @@ export const CountriesForDelivery: FC = () => {
           <Button
             //   variant="contained"
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/goods-page')}
+            onClick={() => navigate('/settings-page')}
           >
             back
           </Button>

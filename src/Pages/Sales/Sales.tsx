@@ -142,6 +142,7 @@ export const Sales: FC = () => {
       <NavMenu />
 
       <Box sx={wrapperBox}>
+        
         <Box sx={sectionBox}>
           <Typography variant="h4" component="h4">
             Sales and special offers settings

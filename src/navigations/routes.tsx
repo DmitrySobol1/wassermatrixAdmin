@@ -14,6 +14,10 @@ import { Carts } from '../Pages/Carts/Carts';
 import { CountriesForDelivery } from '../Pages/CountriesForDelivery/CountriesForDelivery';
 import { AddCountry } from '../Pages/CountriesForDelivery/addCountry';
 import { Orders } from '../Pages/Orders/Orders';
+import { Clients } from '../Pages/Clients/Clients';
+import { ClientOrder } from '../Pages/Clients/ClientOrder';
+import { Settings } from '../Pages/Settings/Settings';
+import { Tags } from '../Pages/Settings/Tags';
 
 
 
@@ -39,10 +43,15 @@ export const routes: Route[] = [
   { path: '/countries-page', Component: CountriesForDelivery },
   { path: '/countries_addnew-page', Component: AddCountry },
 
+  { path: '/clients-page', Component: Clients },
+  { path: '/clientorder-page', Component: ClientOrder },
 
   { path: '/carts-page', Component: Carts },
   
   { path: '/orders-page', Component: Orders },
+  
+  { path: '/settings-page', Component: Settings },
+  { path: '/tags-page', Component: Tags },
 
 //   { path: '/onboarding', Component: Onboarding, title: 'Onboarding' },
   

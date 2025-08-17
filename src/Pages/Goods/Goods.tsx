@@ -13,14 +13,21 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+import SaveIcon from '@mui/icons-material/Save';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PriceChangeIcon from '@mui/icons-material/PriceChange';
 
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { red } from '@mui/material/colors';
+// import { Avatar } from '@mui/material';
+// import { CancelScheduleSendSharp } from '@mui/icons-material';
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -36,6 +43,17 @@ export const Goods: FC = () => {
   const [idToDelete, setIdToDelete] = useState('');
 
   const [selectedChipId, setSelectedChipId] = useState(1);
+  
+  // Special offer состояние
+  const [isAddingSpecialOffer, setIsAddingSpecialOffer] = useState(false);
+  const [currentEditingGoodId, setCurrentEditingGoodId] = useState<string | null>(null);
+  const [saleValue, setSaleValue] = useState('');
+  const [infoTextDe, setInfoTextDe] = useState('');
+  const [infoTextEn, setInfoTextEn] = useState('');
+  const [infoTextRu, setInfoTextRu] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'error' | 'success'>('error');
   const language = 'en';
   const domen = import.meta.env.VITE_DOMEN;
 
@@ -72,6 +90,7 @@ export const Goods: FC = () => {
         const arrayTypesForRender = [
           { name: allElement[language], id: 1 },
           ...arrayTemp,
+          { name: 'with special offer', id: 'special_offer' },
         ];
         //@ts-ignore
         setArrayTypesForRender(arrayTypesForRender);
@@ -84,6 +103,7 @@ export const Goods: FC = () => {
           img: `${domen}${item.file.url}`,
           id: item._id,
           type: item.type,
+          isSaleNow: item.isSaleNow
         }));
 
         setAllGoods(arrayGoodsForRender);
@@ -110,6 +130,15 @@ export const Goods: FC = () => {
     //@ts-ignore
     if (typeId == '1') {
       setArrayGoodsForRender(allGoods);
+      return;
+    }
+
+    // Фильтр для special offer
+    if (typeId === 'special_offer') {
+      //@ts-ignore
+      const specialOfferGoods = allGoods.filter((item) => item.isSaleNow === true);
+      //@ts-ignore
+      setArrayGoodsForRender(specialOfferGoods);
       return;
     }
 
@@ -146,6 +175,116 @@ export const Goods: FC = () => {
     //   border: '2px solid #000',
     boxShadow: 24,
     p: 4,
+  };
+
+  // Функции для special offer
+  const handleAddSpecialOffer = (goodId: string) => {
+    setCurrentEditingGoodId(goodId);
+    setIsAddingSpecialOffer(true);
+    // Сброс полей
+    setSaleValue('');
+    setInfoTextDe('');
+    setInfoTextEn('');
+    setInfoTextRu('');
+  };
+
+  const resetSpecialOfferState = () => {
+    setIsAddingSpecialOffer(false);
+    setCurrentEditingGoodId(null);
+    setSaleValue('');
+    setInfoTextDe('');
+    setInfoTextEn('');
+    setInfoTextRu('');
+  };
+
+  const handleSaveSpecialOffer = async () => {
+    // Валидация - все поля должны быть заполнены
+    if (!saleValue.trim() || !infoTextDe.trim() || !infoTextEn.trim() || !infoTextRu.trim()) {
+      setSnackbarMessage('inputs can`t be empty');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // Валидация saleValue
+    if (isNaN(Number(saleValue)) || Number(saleValue) <= 0) {
+      setSnackbarMessage('Sale value must be a positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post('/admin_update_sale_info', {
+        goodId: currentEditingGoodId,
+        saleValue: Number(saleValue),
+        infoForFront_de: infoTextDe.trim(),
+        infoForFront_en: infoTextEn.trim(),
+        infoForFront_ru: infoTextRu.trim(),
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем локальное состояние товаров
+        //@ts-ignore
+        setAllGoods(prev => 
+          prev.map(good => 
+            //@ts-ignore
+            good.id === currentEditingGoodId 
+              //@ts-ignore
+              ? { ...good, saleInfo: response.data.good.saleInfo, isSaleNow: true }
+              : good
+          )
+        );
+        
+        //@ts-ignore
+        setArrayGoodsForRender(prev => 
+          prev.map(good => 
+            //@ts-ignore
+            good.id === currentEditingGoodId 
+            //@ts-ignore
+              ? { ...good, saleInfo: response.data.good.saleInfo, isSaleNow: true }
+              : good
+          )
+        );
+
+        resetSpecialOfferState();
+        
+        // Показываем успешное сообщение
+        setSnackbarMessage('special offer successully set');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        
+        console.log('Special offer updated successfully');
+      }
+    } catch (error: any) {
+      console.error('Error updating special offer:', error);
+      setSnackbarMessage('Error updating special offer: ' + (error.response?.data?.error || error.message));
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleBlurSpecialOffer = (event: React.FocusEvent) => {
+    const relatedTarget = event.relatedTarget as HTMLElement;
+    if (relatedTarget && (
+      relatedTarget.closest('[data-special-offer-input]') || 
+      relatedTarget.closest('[data-special-offer-button]')
+    )) {
+      return; // Не сбрасываем, если фокус на связанных элементах
+    }
+    
+    setTimeout(() => {
+      if (isAddingSpecialOffer) {
+        resetSpecialOfferState();
+      }
+    }, 150);
+  };
+
+  // Обработчик нажатия клавиш
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      resetSpecialOfferState();
+    }
   };
 
   //@ts-ignore
@@ -204,6 +343,51 @@ export const Goods: FC = () => {
     mb: 3,
   };
 
+  const cancellSaleHandler = async (goodId: string) => {
+    try {
+      const response = await axios.post('/admin_cancel_sale_offer', {
+        goodId: goodId
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем локальное состояние товаров
+        //@ts-ignore
+        setAllGoods(prev => 
+          prev.map(good => 
+           //@ts-ignore
+            good.id === goodId 
+             //@ts-ignore
+              ? { ...good, isSaleNow: false, saleInfo: null }
+              : good
+          )
+        );
+        
+        //@ts-ignore
+        setArrayGoodsForRender(prev => 
+          prev.map(good => 
+             //@ts-ignore
+            good.id === goodId 
+             //@ts-ignore
+              ? { ...good, isSaleNow: false, saleInfo: null }
+              : good
+          )
+        );
+
+        // Показываем успешное сообщение
+        setSnackbarMessage('Special offer cancelled successfully');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        
+        console.log('Special offer cancelled successfully');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling special offer:', error);
+      setSnackbarMessage('Error cancelling special offer: ' + (error.response?.data?.error || error.message));
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
   return (
     <>
       <NavMenu />
@@ -233,7 +417,7 @@ export const Goods: FC = () => {
                 key={type.id}
                 label={type.name}
                 variant={selectedChipId === type.id ? 'filled' : 'outlined'}
-                color="primary"
+                color={type.id === 'special_offer' ? 'warning' : 'primary'}
                 clickable
                 onClick={() => typePressedHandler(type.id)}
               >
@@ -280,7 +464,19 @@ export const Goods: FC = () => {
                   label={arrayTypesForGoodTable[item.type]}
                   variant="outlined"
                   size="small"
+                  sx={{ mr: 5 }}
                 />
+
+                {item.isSaleNow && (
+                  <Chip
+                    label='special offer'
+                    variant="filled"
+                    size="medium"
+                    color='warning'
+                    onDelete={() => cancellSaleHandler(item.id)}
+                  />
+                )}
+                
               </div>
               <Typography
                 variant="body1"
@@ -298,7 +494,7 @@ export const Goods: FC = () => {
                 {item.description_long}
               </Typography>
 
-              <Tooltip title="Edit item">
+              <Tooltip title={`Edit ${item.name}`}>
                 <IconButton
                   aria-label="edit"
                   color="primary"
@@ -310,7 +506,8 @@ export const Goods: FC = () => {
                   </Typography>
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Delete item">
+
+              <Tooltip title={`Delete ${item.name}`}>
                 <IconButton
                   aria-label="delete"
                   sx={{ color: red[500] }}
@@ -322,6 +519,88 @@ export const Goods: FC = () => {
                   </Typography>
                 </IconButton>
               </Tooltip>
+
+              {!item.isSaleNow && (
+                <Tooltip title={`Click to add special offer for ${item.name}`}>
+                  <IconButton
+                    aria-label="add-special-offer"
+                    sx={{ color: '#ed6c02' }}
+                    onClick={() => handleAddSpecialOffer(item.id)}
+                  >
+                    <PriceChangeIcon />{' '}
+                    <Typography component="div" variant="body1" sx={{ mr: 1 }}>
+                      ADD SPECIAL OFFER
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* Special Offer Inputs */}
+              {isAddingSpecialOffer && currentEditingGoodId === item.id && (
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1, flexWrap: 'wrap' }}>
+                  <TextField
+                    size="small"
+                    placeholder="set sale value"
+                    value={saleValue}
+                    onChange={(e) => setSaleValue(e.target.value)}
+                    onBlur={handleBlurSpecialOffer}
+                    onKeyDown={handleKeyPress}
+                    data-special-offer-input
+                    sx={{ width: 200 }}
+                    autoFocus
+                    type="number"
+                  />
+                  <TextField
+                    size="small"
+                    placeholder="info for user on deutsch"
+                    value={infoTextDe}
+                    onChange={(e) => setInfoTextDe(e.target.value)}
+                    onBlur={handleBlurSpecialOffer}
+                    onKeyDown={handleKeyPress}
+                    data-special-offer-input
+                    sx={{ width: 200 }}
+                  />
+                  <TextField
+                    size="small"
+                    placeholder="info for user on english"
+                    value={infoTextEn}
+                    onChange={(e) => setInfoTextEn(e.target.value)}
+                    onBlur={handleBlurSpecialOffer}
+                    onKeyDown={handleKeyPress}
+                    data-special-offer-input
+                    sx={{ width: 200 }}
+                  />
+                  <TextField
+                    size="small"
+                    placeholder="info for user on russian"
+                    value={infoTextRu}
+                    onChange={(e) => setInfoTextRu(e.target.value)}
+                    onBlur={handleBlurSpecialOffer}
+                    onKeyDown={handleKeyPress}
+                    data-special-offer-input
+                    sx={{ width: 200 }}
+                  />
+                  <IconButton
+                    aria-label="save"
+                    color="success"
+                    data-special-offer-button
+                    onClick={handleSaveSpecialOffer}
+                  >
+                    <SaveIcon />
+                  </IconButton>
+                  <IconButton
+                    aria-label="cancel"
+                    color="default"
+                    data-special-offer-button
+                    onClick={resetSpecialOfferState}
+                  >
+                    <Typography sx={{ fontSize: '18px' }}>✕</Typography>
+                  </IconButton>
+                </Box>
+              )}
+
+             
+            
             </Box>
           </Stack>
         ))}
@@ -445,6 +724,22 @@ export const Goods: FC = () => {
           </Box>
         </Modal>
       </div>
+
+      {/* Snackbar для сообщений */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert 
+          onClose={() => setSnackbarOpen(false)} 
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

@@ -663,6 +663,7 @@ export const AddSale: FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography variant="body2" sx={{ mb: 1 }}>Recommended aspect ratio: 2,05 х 1</Typography>
               <Typography variant="body2">Recommended image size: 1150px х 560px</Typography>
+              <Typography variant="body2">File type: JPG</Typography>
             </Box>
           </ListItem>
 

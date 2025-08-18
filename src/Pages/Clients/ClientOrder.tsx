@@ -554,7 +554,7 @@ export const ClientOrder: FC = () => {
                                       display: 'block',
                                     }}
                                   >
-                                    {item.qty} pcs x {item.price_eu} € = {item.qty * item.price_eu} €
+                                    {item.qty} pcs x {item.actualPurchasePriceInEu} € = {item.qty * item.actualPurchasePriceInEu} €
                                   </Typography>
                                   <Typography
                                     component="span"
@@ -565,6 +565,16 @@ export const ClientOrder: FC = () => {
                                     }}
                                   >
                                     Delivery: {item[`delivery_price_${order.regionDelivery}`]} € x {item.qty} = {(item[`delivery_price_${order.regionDelivery}`] * item.qty).toFixed(2)} €
+                                  </Typography>
+                                  <Typography
+                                    component="span"
+                                    variant="body2"
+                                    sx={{
+                                      color: 'text.secondary',
+                                      display: 'block',
+                                    }}
+                                  >
+                                    Purchased by sale: {item.isPurchasedBySale ? 'yes' : 'no, with base price'}
                                   </Typography>
                                 </>
                               }

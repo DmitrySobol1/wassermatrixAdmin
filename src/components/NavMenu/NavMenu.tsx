@@ -80,17 +80,8 @@ export default function NavMenu() {
               </Link>
             </Typography>
             
-            {/* <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              <Link
-                href="#/countries-page"
-                underline="hover"
-                style={getMenuItemStyle('/countries-page')}
-              >
-                {'Countries'}
-              </Link>
-            </Typography> */}
 
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
               <Link
                 href="#/sales-page"
                 underline="hover"
@@ -100,15 +91,26 @@ export default function NavMenu() {
                 {'Special offers'}
               </Link>
             </Typography>
-          </div>
+            
+            <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
+              <Link
+                href="#/router_statistic-page"
+                underline="hover"
+                id="3"
+                style={getMenuItemStyle('/router_statistic-page')}
+              >
+                {'Statistic'}
+              </Link>
+            </Typography>
           
+            </div>
           <Typography variant="h6" component="div">
             <Link
               href="#/settings-page"
               underline="hover"
               id="3"
               style={getMenuItemStyle('/settings-page')}
-            >
+              >
               <SettingsIcon/>{'Settings'}
             </Link>
           </Typography>

@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export const Settings: FC = () => {
   const navigate = useNavigate();
@@ -62,6 +63,17 @@ export const Settings: FC = () => {
             onClick={() => navigate('/countries-page')}
           >
             Countries for delivery
+          </Button>
+     
+        </Box>
+        
+        <Box sx={sectionBox}>
+          <Button
+            variant="contained"
+            startIcon={<AdminPanelSettingsIcon />}
+            onClick={() => navigate('/adminslist-page')}
+          >
+            Admins list
           </Button>
      
         </Box>

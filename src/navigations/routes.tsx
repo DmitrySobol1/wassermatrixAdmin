@@ -17,7 +17,11 @@ import { Orders } from '../Pages/Orders/Orders';
 import { Clients } from '../Pages/Clients/Clients';
 import { ClientOrder } from '../Pages/Clients/ClientOrder';
 import { Settings } from '../Pages/Settings/Settings';
+import { AdminsList } from '../Pages/Settings/AdminsList';
 import { Tags } from '../Pages/Settings/Tags';
+import { Statistic } from '../Pages/Statistic/Statistic';
+import { RouterStatistic } from '../Pages/Statistic/RouterStatistic';
+import { GoodsStatistic } from '../Pages/Statistic/GoodsStatistic';
 
 
 
@@ -52,8 +56,12 @@ export const routes: Route[] = [
   
   { path: '/settings-page', Component: Settings },
   { path: '/tags-page', Component: Tags },
+  { path: '/adminslist-page', Component: AdminsList },
+  
+  { path: '/router_statistic-page', Component: RouterStatistic },
+  { path: '/statistic-page', Component: Statistic },
+  { path: '/goods_statistic-page', Component: GoodsStatistic },
 
-//   { path: '/onboarding', Component: Onboarding, title: 'Onboarding' },
   
   
   

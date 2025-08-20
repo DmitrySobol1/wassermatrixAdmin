@@ -23,14 +23,13 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import TelegramIcon from '@mui/icons-material/Telegram';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-
-import TelegramIcon from '@mui/icons-material/Telegram';
 
 import IconButton from '@mui/material/IconButton';
 
@@ -46,6 +45,54 @@ export const Orders: FC = () => {
   const domen = import.meta.env.VITE_DOMEN;
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
 
+  // Функция отправки сообщения клиенту о доставке
+  const sendMessageToClient = async (order: any) => {
+    // Проверяем, что сообщение еще не отправлено
+    if (order.messageToClientAboutDelivery) {
+      return;
+    }
+
+    console.log('btn pressed')
+
+    // Проверяем, что есть дата доставки
+    if (!order.eta) {
+      setSnackbarMessage('Error: please set delivery date first');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post('/user_sendTlgMessage', {
+        tlgid: order.tlgid,
+        eta: order.eta,
+        orderId: order._id
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем статус в локальном состоянии
+        const updateOrderInArray = (orders: any[]) =>
+          orders.map((o: any) =>
+            o._id === order._id
+              ? { ...o, messageToClientAboutDelivery: true }
+              : o
+          );
+
+        // @ts-ignore 
+        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
+        // @ts-ignore 
+        setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
+
+        // Показываем уведомление об успешной отправке
+        setSnackbarMessage('Message to client have been sent');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error sending message to client:', error);
+      setSnackbarMessage('Error sending message to client');
+      setSnackbarOpen(true);
+    }
+  };
+
   // получить список заказов и статусов
   useEffect(() => {
     const fetchData = async () => {
@@ -53,18 +100,18 @@ export const Orders: FC = () => {
         // Загружаем заказы
         const ordersResponse = await axios.get('/admin_get_orders');
         const ordersData = ordersResponse.data.orders;
-        
+
         //@ts-ignore
         // setOrders(ordersData);
         //@ts-ignore
         setAllOrders(ordersData);
         //@ts-ignore
         setOrdersForRender(ordersData);
-        
+
         // Загружаем статусы
         const statusesResponse = await axios.get('/admin_get_order_statuses');
         const statusesData = statusesResponse.data;
-        
+
         //@ts-ignore
         setOrderStatuses(statusesData);
 
@@ -73,15 +120,15 @@ export const Orders: FC = () => {
           { name: 'All', id: 'all' },
           ...statusesData.map((status: any) => ({
             name: status.name_en,
-            id: status._id
+            id: status._id,
           })),
           { name: 'paid', id: 'paid', type: 'payment' },
-          { name: 'not paid', id: 'not_paid', type: 'payment' }
+          { name: 'not paid', id: 'not_paid', type: 'payment' },
         ];
-        
+
         //@ts-ignore
         setStatusFilters(filtersArray);
-        
+
         console.log('orders=', ordersResponse.data);
         console.log('statuses=', statusesData);
         console.log('filters=', filtersArray);
@@ -106,7 +153,7 @@ export const Orders: FC = () => {
 
   // const getStatusColor = (statusObj: any) => {
   //   if (!statusObj || !statusObj.name_en) return 'default';
-    
+
   //   switch (statusObj.name_en.toLowerCase()) {
   //     case 'new':
   //     case 'created':
@@ -128,7 +175,7 @@ export const Orders: FC = () => {
 
   // const getStatusText = (statusObj: any) => {
   //   if (!statusObj) return 'Неизвестный статус';
-    
+
   //   // Возвращаем локализованное название статуса
   //   return statusObj.name_en || statusObj.name_ru || statusObj.name_de || 'Неизвестный статус';
   // };
@@ -147,8 +194,8 @@ export const Orders: FC = () => {
     // Фильтрация по статусу оплаты
     if (filterId === 'paid') {
       //@ts-ignore
-      const filteredOrders = allOrders.filter((order: any) => 
-        order.payStatus === true
+      const filteredOrders = allOrders.filter(
+        (order: any) => order.payStatus === true
       );
       //@ts-ignore
       setOrdersForRender(filteredOrders);
@@ -157,8 +204,8 @@ export const Orders: FC = () => {
 
     if (filterId === 'not_paid') {
       //@ts-ignore
-      const filteredOrders = allOrders.filter((order: any) => 
-        order.payStatus === false
+      const filteredOrders = allOrders.filter(
+        (order: any) => order.payStatus === false
       );
       //@ts-ignore
       setOrdersForRender(filteredOrders);
@@ -167,10 +214,10 @@ export const Orders: FC = () => {
 
     // Фильтруем заказы по выбранному статусу заказа
     //@ts-ignore
-    const filteredOrders = allOrders.filter((order: any) => 
-      order.orderStatus?._id === filterId
+    const filteredOrders = allOrders.filter(
+      (order: any) => order.orderStatus?._id === filterId
     );
-    
+
     //@ts-ignore
     setOrdersForRender(filteredOrders);
   };
@@ -180,14 +227,14 @@ export const Orders: FC = () => {
     try {
       const response = await axios.post('/admin_update_order_status', {
         orderId: orderId,
-        statusId: newStatusId
+        statusId: newStatusId,
       });
 
       if (response.data.status === 'ok') {
         // Обновляем все массивы заказов
-        const updateOrderInArray = (orders: any[]) => 
-          orders.map((order: any) => 
-            order._id === orderId 
+        const updateOrderInArray = (orders: any[]) =>
+          orders.map((order: any) =>
+            order._id === orderId
               ? { ...order, orderStatus: response.data.order.orderStatus }
               : order
           );
@@ -195,9 +242,9 @@ export const Orders: FC = () => {
         //@ts-ignore
         // setOrders(prevOrders => updateOrderInArray(prevOrders));
         //@ts-ignore
-        setAllOrders(prevOrders => updateOrderInArray(prevOrders));
+        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
         //@ts-ignore
-        setOrdersForRender(prevOrders => updateOrderInArray(prevOrders));
+        setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
 
         // Показываем уведомление
         setSnackbarMessage('Information saved');
@@ -214,7 +261,9 @@ export const Orders: FC = () => {
   const handleEtaChange = async (orderId: string, newEta: string) => {
     try {
       // Находим текущий статус заказа
-      const currentOrder = ordersForRender.find((order: any) => order._id === orderId);
+      const currentOrder = ordersForRender.find(
+        (order: any) => order._id === orderId
+      );
       //@ts-ignore
       const currentStatusId = currentOrder?.orderStatus?._id;
 
@@ -227,22 +276,20 @@ export const Orders: FC = () => {
       const response = await axios.post('/admin_update_order_status', {
         orderId: orderId,
         statusId: currentStatusId,
-        eta: newEta
+        eta: newEta,
       });
 
       if (response.data.status === 'ok') {
         // Обновляем все массивы заказов
-        const updateOrderInArray = (orders: any[]) => 
-          orders.map((order: any) => 
-            order._id === orderId 
-              ? { ...order, eta: newEta }
-              : order
+        const updateOrderInArray = (orders: any[]) =>
+          orders.map((order: any) =>
+            order._id === orderId ? { ...order, eta: newEta } : order
           );
 
         //@ts-ignore
-        setAllOrders(prevOrders => updateOrderInArray(prevOrders));
+        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
         //@ts-ignore
-        setOrdersForRender(prevOrders => updateOrderInArray(prevOrders));
+        setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
 
         // Показываем уведомление
         setSnackbarMessage('ETA date saved successfully');
@@ -262,7 +309,7 @@ export const Orders: FC = () => {
       <Box sx={wrapperBox}>
         <Box sx={sectionBox}>
           <Typography variant="h4" component="h4">
-            Users orders 
+            Users orders
           </Typography>
         </Box>
 
@@ -270,20 +317,29 @@ export const Orders: FC = () => {
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={1}>
             {statusFilters.map((filter: any) => {
-              let chipColor: "primary" | "error" | "success" | "info" | "warning" | "default" | "secondary" = "primary";
-              
+              let chipColor:
+                | 'primary'
+                | 'error'
+                | 'success'
+                | 'info'
+                | 'warning'
+                | 'default'
+                | 'secondary' = 'primary';
+
               // Устанавливаем цвета для фильтров оплаты
               if (filter.id === 'paid') {
-                chipColor = "success";
+                chipColor = 'success';
               } else if (filter.id === 'not_paid') {
-                chipColor = "error";
+                chipColor = 'error';
               }
 
               return (
                 <Chip
                   key={filter.id}
                   label={filter.name}
-                  variant={selectedFilterId === filter.id ? 'filled' : 'outlined'}
+                  variant={
+                    selectedFilterId === filter.id ? 'filled' : 'outlined'
+                  }
                   color={chipColor}
                   clickable
                   onClick={() => statusPressedHandler(filter.id)}
@@ -310,68 +366,117 @@ export const Orders: FC = () => {
               <div style={{ display: 'block', width: '100%' }}>
                 <div>
                   <Typography component="div" variant="h6">
-                    <div style={{ display: 'flex', gap: 50, alignItems: 'center' }}>
-                      
-                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                          <AccountCircleIcon color="action" />
-                          <span>User: {order.tlgid}</span>
-                        </div>
+                    <div
+                      style={{ display: 'flex', gap: 50, alignItems: 'center' }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: 10,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <AccountCircleIcon color="action" />
+                        <span>User: {order.tlgid}</span>
+                      </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          
-                          <Chip 
-                            label={order.payStatus ? 'paid' : 'not paid'}
-                            color={order.payStatus ? 'success' : 'error'}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                        }}
+                      >
+                        <Chip
+                          label={order.payStatus ? 'paid' : 'not paid'}
+                          color={order.payStatus ? 'success' : 'error'}
+                          size="small"
+                          variant="filled"
+                        />
+                      </div>
+
+                      <div>
+                        <FormControl
+                          size="small"
+                          sx={{ minWidth: 120, border: 1, borderRadius: 30 }}
+                        >
+                          <Select
+                            value={order.orderStatus?._id || ''}
+                            onChange={(e) =>
+                              handleStatusChange(order._id, e.target.value)
+                            }
+                            displayEmpty
+                            sx={{ fontSize: '0.875rem', borderRadius: 30 }}
+                          >
+                            {orderStatuses.map((status: any) => (
+                              <MenuItem key={status._id} value={status._id}>
+                                {status.name_en}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                      {order.orderStatus?.name_en === 'on the way' && (
+                        <div
+                          style={{
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: order.eta ? 'black' : 'red',
+                            }}
+                          >
+                            {order.eta
+                              ? 'estimate date of delivery:'
+                              : 'set estimate date of delivery:'}
+                          </span>
+                          <TextField
+                            type="date"
+                            value={order.eta || ''}
+                            onChange={(e) =>
+                              handleEtaChange(order._id, e.target.value)
+                            }
                             size="small"
-                            variant="filled"
+                            sx={{ width: 150, mr: 5 }}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
                           />
+                          <span
+                            style={{
+                              color: order.messageToClientAboutDelivery === true ? '#2e7d32' : 'white',
+                              border: `1px solid ${order.messageToClientAboutDelivery === true ? '#2e7d32' : '#d32f2f'}`,
+                              borderRadius: 15,
+                              backgroundColor: order.messageToClientAboutDelivery === true ? '#fff' : '#d32f2f',
+                              padding: '7px 10px 7px 10px ',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 5,
+                              cursor: order.messageToClientAboutDelivery === true ? 'default' : 'pointer',
+                              opacity: order.messageToClientAboutDelivery === true ? 0.7 : 1,
+                            }}
+                            onClick={() => sendMessageToClient(order)}
+                          >
+                            <TelegramIcon /> {order.messageToClientAboutDelivery ? 'message sent': 'send message to client'}
+                          </span>
                         </div>
-
-                        <div>
-                            <FormControl size="small" sx={{ minWidth: 120, border:1, borderRadius:30 }}>
-                              <Select
-                                value={order.orderStatus?._id || ''}
-                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                displayEmpty
-                                sx={{ fontSize: '0.875rem', borderRadius:30 }}
-                              >
-                                {orderStatuses.map((status: any) => (
-                                  <MenuItem key={status._id} value={status._id}>
-                                    {status.name_en}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                        </div>
-                             {order.orderStatus?.name_en === 'on the way' &&
-                                <div style={{ fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 10 }}>
-                                  <span style={{ 
-                                    color: order.eta ? 'black' : 'red'
-                                  }}>
-                                    {order.eta ? 'estimate date of delivery:' : 'set estimate date of delivery:'}
-                                  </span>
-                                  <TextField
-                                    type="date"
-                                    value={order.eta || ''}
-                                    onChange={(e) => handleEtaChange(order._id, e.target.value)}
-                                    size="small"
-                                    sx={{ width: 150 }}
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                  />
-                                </div>
-                             }     
+                      )}
                     </div>
                   </Typography>
                 </div>
-                        <Typography
-                    variant="body1"
-                    component="div"
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    Order ID: {order._id}
-                  </Typography>
+                <Typography
+                  variant="body1"
+                  component="div"
+                  sx={{ color: 'text.secondary' }}
+                >
+                  Order ID: {order._id}
+                </Typography>
 
                 <div style={{ marginTop: 20 }}>
                   <Typography
@@ -379,18 +484,7 @@ export const Orders: FC = () => {
                     component="div"
                     sx={{ color: 'text.primary' }}
                   >
-                    Order date:  {order.formattedDate}
-                  </Typography>
-                  
-                </div>
-
-                <div style={{ marginTop: 8 }}>
-                  <Typography
-                    variant="body1"
-                    component="div"
-                    sx={{ color: 'text.primary' }}
-                  >
-                    <div>Delivery info: {order.country} ({order.regionDelivery}), {order.adress} </div> 
+                    Order date: {order.formattedDate}
                   </Typography>
                 </div>
 
@@ -400,22 +494,39 @@ export const Orders: FC = () => {
                     component="div"
                     sx={{ color: 'text.primary' }}
                   >
-                    <div>Contact info:  {order.name} | {order.phone}</div> 
-                   
+                    <div>
+                      Delivery info: {order.country} ({order.regionDelivery}),{' '}
+                      {order.adress}{' '}
+                    </div>
                   </Typography>
                 </div>
 
-                
+                <div style={{ marginTop: 8 }}>
+                  <Typography
+                    variant="body1"
+                    component="div"
+                    sx={{ color: 'text.primary' }}
+                  >
+                    <div>
+                      Contact info: {order.name} | {order.phone}
+                    </div>
+                  </Typography>
+                </div>
 
                 <div style={{ marginTop: 20, marginBottom: 15 }}>
                   <Typography
                     variant="body1"
                     component="div"
-                    sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', gap: 2 }}
+                    sx={{
+                      color: 'text.primary',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                    }}
                   >
                     <span>
-                      Items: {order.qtyItemsInOrder} {'  '} |{'  '}{' '}
-                      Total: {order.totalAmount.toFixed(2)} €
+                      Items: {order.qtyItemsInOrder} {'  '} |{'  '} Total:{' '}
+                      {order.totalAmount.toFixed(2)} €
                     </span>
                     {/* <FormControl size="small" sx={{ minWidth: 120 }}>
                       <Select
@@ -431,7 +542,6 @@ export const Orders: FC = () => {
                         ))}
                       </Select>
                     </FormControl> */}
-                    
                   </Typography>
                 </div>
 
@@ -457,7 +567,10 @@ export const Orders: FC = () => {
                         }}
                       >
                         {order.goods.map((item: any, index: number) => (
-                          <ListItem alignItems="flex-start" key={`${item.itemId}-${index}`}>
+                          <ListItem
+                            alignItems="flex-start"
+                            key={`${item.itemId}-${index}`}
+                          >
                             <ListItemAvatar>
                               <Avatar
                                 alt={item.name_en}
@@ -481,7 +594,8 @@ export const Orders: FC = () => {
                                       display: 'block',
                                     }}
                                   >
-                                    {item.qty} pcs x {item.price_eu} € = {item.qty * item.price_eu} €
+                                    {item.qty} pcs x {item.price_eu} € ={' '}
+                                    {item.qty * item.price_eu} €
                                   </Typography>
                                   <Typography
                                     component="span"
@@ -491,7 +605,19 @@ export const Orders: FC = () => {
                                       display: 'block',
                                     }}
                                   >
-                                    Delivery: {item[`delivery_price_${order.regionDelivery}`]} € x {item.qty} = {(item[`delivery_price_${order.regionDelivery}`] * item.qty).toFixed(2)} €
+                                    Delivery:{' '}
+                                    {
+                                      item[
+                                        `delivery_price_${order.regionDelivery}`
+                                      ]
+                                    }{' '}
+                                    € x {item.qty} ={' '}
+                                    {(
+                                      item[
+                                        `delivery_price_${order.regionDelivery}`
+                                      ] * item.qty
+                                    ).toFixed(2)}{' '}
+                                    €
                                   </Typography>
                                 </>
                               }
@@ -534,8 +660,8 @@ export const Orders: FC = () => {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
           severity={snackbarMessage.includes('Error') ? 'error' : 'success'}
           sx={{ width: '100%' }}
         >

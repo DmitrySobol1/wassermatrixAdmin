@@ -9,10 +9,8 @@ import { EditSale } from '../Pages/Sales/EditSale';
 import { AddNewGood } from '../Pages/Goods/AddNewGood';
 import { EditGood } from '../Pages/Goods/EditGood';
 import { Filters } from '../Pages/FiltersSettings/Filters';
-import { AddFilter } from '../Pages/FiltersSettings/AddFilter';
 import { Carts } from '../Pages/Carts/Carts';
 import { CountriesForDelivery } from '../Pages/CountriesForDelivery/CountriesForDelivery';
-import { AddCountry } from '../Pages/CountriesForDelivery/addCountry';
 import { Orders } from '../Pages/Orders/Orders';
 import { Clients } from '../Pages/Clients/Clients';
 import { ClientOrder } from '../Pages/Clients/ClientOrder';
@@ -42,10 +40,8 @@ export const routes: Route[] = [
   { path: '/edit_good-page', Component: EditGood },
   
   { path: '/filters-page', Component: Filters },
-  { path: '/filters_addnew-page', Component: AddFilter },
   
   { path: '/countries-page', Component: CountriesForDelivery },
-  { path: '/countries_addnew-page', Component: AddCountry },
 
   { path: '/clients-page', Component: Clients },
   { path: '/clientorder-page', Component: ClientOrder },

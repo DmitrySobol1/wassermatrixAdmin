@@ -45,6 +45,8 @@ export const Tags: FC = () => {
   const [editTagName, setEditTagName] = useState('');
   const [editTagDescription, setEditTagDescription] = useState('');
   const [isCheckingTagUsage, setIsCheckingTagUsage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSavingTag, setIsSavingTag] = useState(false);
 
 //   const language = 'en';
 //   const domen = import.meta.env.VITE_DOMEN;
@@ -63,6 +65,7 @@ export const Tags: FC = () => {
   // получить список тегов
   useEffect(() => {
     const fetchTags = async () => {
+      setIsLoading(true);
       try {
         const tags = await axios.get('/admin_get_tags');
         console.log('TAGS=', tags.data);
@@ -71,6 +74,8 @@ export const Tags: FC = () => {
         setArrayTagsForRender(tags.data);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -87,6 +92,7 @@ export const Tags: FC = () => {
       return;
     }
 
+    setIsSavingTag(true);
     try {
       const response = await axios.post('/admin_add_tag', {
         name: newTagName.trim(),
@@ -119,6 +125,8 @@ export const Tags: FC = () => {
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
+    } finally {
+      setIsSavingTag(false);
     }
   };
 
@@ -314,6 +322,27 @@ export const Tags: FC = () => {
     }, 150);
   };
 
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
+
   return (
     <>
       <NavMenu />
@@ -344,8 +373,9 @@ export const Tags: FC = () => {
             <Button
               variant="contained"
               color={isAddingTag ? "success" : "primary"}
-              startIcon={isAddingTag ? <SaveIcon /> : <AddCircleSharpIcon />}
+              startIcon={isAddingTag && !isSavingTag ? <SaveIcon /> : isAddingTag && isSavingTag ? <CircularProgress size={20} color="inherit" /> : <AddCircleSharpIcon />}
               data-save-button
+              disabled={isSavingTag}
               onClick={() => {
                 if (isAddingTag) {
                   handleCreateTag();
@@ -354,7 +384,7 @@ export const Tags: FC = () => {
                 }
               }}
             >
-              {isAddingTag ? 'Save tag' : 'Add new tag'}
+              {isAddingTag ? (isSavingTag ? 'Saving...' : 'Save tag') : 'Add new tag'}
             </Button>
             
             {isAddingTag && (

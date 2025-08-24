@@ -20,6 +20,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Chip from '@mui/material/Chip';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const Clients: FC = () => {
   const navigate = useNavigate();
@@ -27,11 +28,13 @@ export const Clients: FC = () => {
   const [arrayUsersForRender, setArrayUsersForRender] = useState([]);
 //   const [allOrders, setAllOrders] = useState([]);
   const [allTags, setAllTags] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
 
   // получить список пользователей и заказов
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         // Загружаем пользователей
         const users = await axios.get('/admin_get_users');
@@ -71,6 +74,8 @@ export const Clients: FC = () => {
         console.log('formattedUsers', arrayUsersForRender);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -115,6 +120,27 @@ export const Clients: FC = () => {
   const sectionBox = {
     mb: 5,
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

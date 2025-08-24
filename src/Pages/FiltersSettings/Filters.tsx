@@ -41,6 +41,7 @@ export const Filters: FC = () => {
   const [filterTitle, setFilterTitle] = useState('');
   const [idToDelete, setIdToDelete] = useState('');
   const [isCheckingFilterUsage, setIsCheckingFilterUsage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   //   const language = 'en';
   //   const domen = import.meta.env.VITE_DOMEN;
@@ -48,6 +49,7 @@ export const Filters: FC = () => {
   // получить список типов товаров + товары
   useEffect(() => {
     const fetchGoodsTypesInfo = async () => {
+      setIsLoading(true);
       try {
         const types = await axios.get('/user_get_goodsstype');
 
@@ -88,8 +90,7 @@ export const Filters: FC = () => {
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
-        // setShowLoader(false);
-        // setWolfButtonActive(true);
+        setIsLoading(false);
       }
     };
 
@@ -423,6 +424,27 @@ export const Filters: FC = () => {
   // const itemInSectionBox = {
   //   mb: 3,
   // };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

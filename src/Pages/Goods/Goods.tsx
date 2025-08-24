@@ -17,6 +17,7 @@ import TextField from '@mui/material/TextField';
 import SaveIcon from '@mui/icons-material/Save';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -41,8 +42,10 @@ export const Goods: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [goodName, setGoodName] = useState('');
   const [idToDelete, setIdToDelete] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [selectedChipId, setSelectedChipId] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Special offer состояние
   const [isAddingSpecialOffer, setIsAddingSpecialOffer] = useState(false);
@@ -60,6 +63,7 @@ export const Goods: FC = () => {
   // получить список типов товаров + товары
   useEffect(() => {
     const fetchGoodsTypesInfo = async () => {
+      setIsLoading(true);
       try {
         const types = await axios.get('/user_get_goodsstype');
         const goods = await axios.get('/admin_get_goods');
@@ -114,8 +118,7 @@ export const Goods: FC = () => {
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
-        // setShowLoader(false);
-        // setWolfButtonActive(true);
+        setIsLoading(false);
       }
     };
 
@@ -295,6 +298,7 @@ export const Goods: FC = () => {
   }
 
   async function modalYesBtnHandler() {
+    setIsDeleting(true);
     try {
       console.log('idToDelete=', idToDelete);
 
@@ -322,8 +326,7 @@ export const Goods: FC = () => {
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
     } finally {
-      // setShowLoader(false);
-      // setWolfButtonActive(true);
+      setIsDeleting(false);
     }
   }
 
@@ -387,6 +390,27 @@ export const Goods: FC = () => {
       setSnackbarOpen(true);
     }
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -710,13 +734,16 @@ export const Goods: FC = () => {
                 onClick={modalYesBtnHandler}
                 color="error"
                 sx={{ mr: 2 }}
+                disabled={isDeleting}
+                startIcon={isDeleting ? <CircularProgress size={16} color="inherit" /> : null}
               >
-                Yes, delete
+                {isDeleting ? 'Deleting...' : 'Yes, delete'}
               </Button>
               <Button
                 variant="contained"
                 onClick={() => setOpenModal(false)}
                 color="success"
+                disabled={isDeleting}
               >
                 No, leave item alone
               </Button>

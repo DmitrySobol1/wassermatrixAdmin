@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Modal from '@mui/material/Modal';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 
@@ -27,6 +28,8 @@ export const Sales: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [saleTitle, setSaleTitle] = useState('');
   const [idToDelete, setIdToDelete] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const language = 'en';
   const domen = import.meta.env.VITE_DOMEN;
@@ -34,6 +37,7 @@ export const Sales: FC = () => {
   // получить список акций
   useEffect(() => {
     const fetchSalesInfo = async () => {
+      setIsLoading(true);
       try {
         const sales = await axios.get('/admin_get_sales');
 
@@ -57,6 +61,8 @@ export const Sales: FC = () => {
         console.log('formattedSales', arraySalesForRender);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -91,6 +97,7 @@ export const Sales: FC = () => {
   }
 
   async function modalYesBtnHandler() {
+    setIsDeleting(true);
     try {
       console.log('idToDelete=', idToDelete);
 
@@ -119,6 +126,8 @@ export const Sales: FC = () => {
       }
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -136,6 +145,27 @@ export const Sales: FC = () => {
 //   const itemInSectionBox = {
 //     mb: 3,
 //   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -293,13 +323,16 @@ export const Sales: FC = () => {
                 onClick={modalYesBtnHandler}
                 color="error"
                 sx={{ mr: 2 }}
+                disabled={isDeleting}
+                startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : undefined}
               >
-                Yes, delete
+                {isDeleting ? 'Deleting...' : 'Yes, delete'}
               </Button>
               <Button
                 variant="contained"
                 onClick={() => setOpenModal(false)}
                 color="success"
+                disabled={isDeleting}
               >
                 No, leave sale alone
               </Button>

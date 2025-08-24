@@ -26,6 +26,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
+import CircularProgress from '@mui/material/CircularProgress';
 // import InputLabel from '@mui/material/InputLabel';
 
 export const EditGood: FC = () => {
@@ -39,6 +40,8 @@ export const EditGood: FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Функция проверки заполненности всех полей
   const isFormValid = () => {
@@ -83,6 +86,7 @@ export const EditGood: FC = () => {
   // получить товар по id и список типов для вып списка
   useEffect(() => {
     const fetchCurrentGood = async () => {
+      setIsLoading(true);
       try {
         const good = await axios.get('/admin_get_currentgood', {
           //   @ts-ignore
@@ -143,8 +147,7 @@ export const EditGood: FC = () => {
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
-        // setShowLoader(false);
-        // setWolfButtonActive(true);
+        setIsLoading(false);
       }
     };
 
@@ -189,6 +192,7 @@ export const EditGood: FC = () => {
     //       return;
     //     }
 
+    setIsSaving(true);
     const data = new FormData();
     data.append('id', goodId);
     //@ts-ignore
@@ -238,6 +242,7 @@ export const EditGood: FC = () => {
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
     } finally {
+      setIsSaving(false);
       console.log('finally');
     }
   }
@@ -320,6 +325,27 @@ export const EditGood: FC = () => {
   const itemInSectionBox = {
     mb: 3,
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -791,7 +817,7 @@ export const EditGood: FC = () => {
 
           <Box  sx={sectionBox }>
             <Tooltip 
-              title={!isFormValid() ? "Fill in all inputs" : ""}
+              title={!isFormValid() ? "Fill in all inputs" : isSaving ? "Saving..." : ""}
               placement="top"
               arrow
             >
@@ -801,9 +827,10 @@ export const EditGood: FC = () => {
                   onClick={saveBtnHandler}
                   color="success"
                   sx={{width: 200}}
-                  disabled={!isFormValid()}
+                  disabled={!isFormValid() || isSaving}
+                  startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : null}
                 >
-                  Save good
+                  {isSaving ? 'Saving...' : 'Save good'}
                 </Button>
               </span>
             </Tooltip>

@@ -26,6 +26,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 // import { useNavigate } from 'react-router-dom';
@@ -59,6 +60,8 @@ export const AddNewGood: FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Функция проверки заполненности всех полей
   const isFormValid = () => {
@@ -98,6 +101,7 @@ export const AddNewGood: FC = () => {
     const language = 'en';
 
     const fetchGoodsTypesInfo = async () => {
+      setIsLoading(true);
       try {
         const types = await axios.get('/user_get_goodsstype');
 
@@ -113,8 +117,7 @@ export const AddNewGood: FC = () => {
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
-        // setShowLoader(false);
-        // setWolfButtonActive(true);
+        setIsLoading(false);
       }
     };
 
@@ -137,6 +140,7 @@ export const AddNewGood: FC = () => {
     //       return;
     //     }
 
+    setIsSaving(true);
     const data = new FormData();
     data.append('article', allInputDatas.article);
     data.append('name_de', allInputDatas.name_de);
@@ -170,6 +174,7 @@ export const AddNewGood: FC = () => {
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
     } finally {
+      setIsSaving(false);
       console.log('finally');
     }
   }
@@ -271,6 +276,27 @@ export const AddNewGood: FC = () => {
   const itemInSectionBox = {
     mb: 3,
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -651,7 +677,7 @@ export const AddNewGood: FC = () => {
         <Box component="section" sx={sectionBox}>
       <ListItem>
           <Tooltip 
-            title={!isFormValid() ? "Fill in all inputs" : ""}
+            title={!isFormValid() ? "Fill in all inputs" : isSaving ? "Saving..." : ""}
             placement="top"
             arrow
           >
@@ -661,9 +687,10 @@ export const AddNewGood: FC = () => {
                 onClick={saveBtnHandler} 
                 color="success" 
                 sx={{width:200}}
-                disabled={!isFormValid()}
+                disabled={!isFormValid() || isSaving}
+                startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : null}
               >
-                Save good
+                {isSaving ? 'Saving...' : 'Save good'}
               </Button>
             </span>
           </Tooltip>

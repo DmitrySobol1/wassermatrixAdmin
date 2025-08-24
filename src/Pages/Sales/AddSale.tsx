@@ -26,6 +26,7 @@ import { MenuItem } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Tooltip from '@mui/material/Tooltip';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -73,6 +74,8 @@ export const AddSale: FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Функция проверки заполненности обязательных полей
   const isFormValid = () => {
@@ -117,6 +120,7 @@ export const AddSale: FC = () => {
   // получить все товары для select
   useEffect(() => {
     const fetchGoods = async () => {
+      setIsLoading(true);
       try {
         // исправлен endpoint на получение всех товаров
         const allGoods = await axios.get('/admin_get_goods');
@@ -132,6 +136,8 @@ export const AddSale: FC = () => {
         // console.log('formattedGoods', arrayTemp);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -182,6 +188,8 @@ export const AddSale: FC = () => {
       return;
     }
 
+    setIsSaving(true);
+
     const data = new FormData();
     data.append('title_de', allInputDatas.title_de);
     data.append('title_en', allInputDatas.title_en);
@@ -218,7 +226,7 @@ export const AddSale: FC = () => {
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
     } finally {
-      console.log('finally');
+      setIsSaving(false);
     }
   }
 
@@ -317,6 +325,27 @@ export const AddSale: FC = () => {
   const itemInSectionBox = {
     mb: 3,
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -798,9 +827,10 @@ export const AddSale: FC = () => {
                   onClick={saveBtnHandler}
                   color="success"
                   sx={{ width: 200 }}
-                  disabled={!isFormValid()}
+                  disabled={!isFormValid() || isSaving}
+                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : undefined}
                 >
-                  Save special offer
+                  {isSaving ? 'Saving...' : 'Save special offer'}
                 </Button>
               </span>
             </Tooltip>

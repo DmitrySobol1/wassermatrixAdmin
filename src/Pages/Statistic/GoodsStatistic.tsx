@@ -39,6 +39,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -494,7 +495,10 @@ export const GoodsStatistic: FC = () => {
             
             <Box sx={{ height: 600 }}>
               {isLoading ? (
-                <Typography>Loading data...</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} />
+                  <Typography>Loading data...</Typography>
+                </Box>
               ) : goodsSalesData.labels.length > 0 ? (
                 <Bar data={goodsSalesData} options={chartOptions} />
               ) : (

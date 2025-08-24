@@ -27,6 +27,7 @@ import Avatar from '@mui/material/Avatar';
 import TelegramIcon from '@mui/icons-material/Telegram';
 
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -34,12 +35,14 @@ export const Carts: FC = () => {
   //   const navigate = useNavigate();
 
   const [carts, setCarts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const domen = import.meta.env.VITE_DOMEN;
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
 
   // получить список корзин
   useEffect(() => {
     const fetchGoodsTypesInfo = async () => {
+      setIsLoading(true);
       try {
         // const types = await axios.get('/user_get_goodsstype');
 
@@ -51,8 +54,7 @@ export const Carts: FC = () => {
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
-        // setShowLoader(false);
-        // setWolfButtonActive(true);
+        setIsLoading(false);
       }
     };
 
@@ -74,6 +76,27 @@ export const Carts: FC = () => {
 //   const itemInSectionBox = {
 //     mb: 3,
 //   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

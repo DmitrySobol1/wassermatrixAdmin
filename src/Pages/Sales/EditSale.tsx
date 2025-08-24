@@ -26,6 +26,7 @@ import { MenuItem } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Tooltip from '@mui/material/Tooltip';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const EditSale: FC = () => {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export const EditSale: FC = () => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Функция проверки заполненности обязательных полей
   const isFormValid = () => {
@@ -233,6 +235,8 @@ export const EditSale: FC = () => {
       return;
     }
 
+    setIsSaving(true);
+
     const data = new FormData();
     data.append('id', saleId);
     data.append('title_de', allInputDatas.title_de);
@@ -268,6 +272,8 @@ export const EditSale: FC = () => {
       setOpenModal(true);
     } catch (error) {
       console.error('Ошибка при выполнении запроса:', error);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -350,8 +356,18 @@ export const EditSale: FC = () => {
     return (
       <>
         <NavMenu />
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-          <Typography>Loading...</Typography>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
         </Box>
       </>
     );
@@ -847,9 +863,10 @@ export const EditSale: FC = () => {
                   onClick={saveBtnHandler}
                   color="success"
                   sx={{ width: 200 }}
-                  disabled={!isFormValid()}
+                  disabled={!isFormValid() || isSaving}
+                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : undefined}
                 >
-                  Update special offer
+                  {isSaving ? 'Updating...' : 'Update special offer'}
                 </Button>
               </span>
             </Tooltip>

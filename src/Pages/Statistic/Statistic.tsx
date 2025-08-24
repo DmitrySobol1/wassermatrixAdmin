@@ -39,6 +39,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -555,7 +556,10 @@ export const Statistic: FC = () => {
 
               <Box sx={{ height: 400 }}>
                 {isLoading ? (
-                  <Typography>Loading data...</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={20} />
+                    <Typography>Loading data...</Typography>
+                  </Box>
                 ) : (activeTab === 0 && dailySalesData.labels.length > 0) ? (
                   <Bar data={dailySalesData} options={chartOptions} />
                 ) : (activeTab === 1 && yearlyChart.labels.length > 0) ? (
@@ -574,7 +578,10 @@ export const Statistic: FC = () => {
                 }
               </Typography>
               {isLoading ? (
-                <Typography>Loading...</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} />
+                  <Typography>Loading...</Typography>
+                </Box>
               ) : (
                 <>
                   <Typography variant="body1" sx={{ mb: 1 }}>

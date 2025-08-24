@@ -17,6 +17,7 @@ import FormControl from '@mui/material/FormControl';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -42,6 +43,7 @@ export const Orders: FC = () => {
   const [selectedFilterId, setSelectedFilterId] = useState('all'); // Выбранный фильтр
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const domen = import.meta.env.VITE_DOMEN;
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
 
@@ -96,6 +98,7 @@ export const Orders: FC = () => {
   // получить список заказов и статусов
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         // Загружаем заказы
         const ordersResponse = await axios.get('/admin_get_orders');
@@ -134,6 +137,8 @@ export const Orders: FC = () => {
         console.log('filters=', filtersArray);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -301,6 +306,27 @@ export const Orders: FC = () => {
       setSnackbarOpen(true);
     }
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <NavMenu />
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading ...
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

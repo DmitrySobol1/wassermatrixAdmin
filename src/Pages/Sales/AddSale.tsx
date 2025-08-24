@@ -25,6 +25,7 @@ import Select from '@mui/material/Select';
 import { MenuItem } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import Tooltip from '@mui/material/Tooltip';
 
 // import { useNavigate } from 'react-router-dom';
 
@@ -72,6 +73,39 @@ export const AddSale: FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
+
+  // Функция проверки заполненности обязательных полей
+  const isFormValid = () => {
+    const requiredFields = [
+      'title_de',
+      'title_en', 
+      'title_ru',
+      'subtitle_de',
+      'subtitle_en',
+      'subtitle_ru',
+      'info_de',
+      'info_en',
+      'info_ru',
+      'dateUntil',
+      'buttonText_de',
+      'buttonText_en',
+      'buttonText_ru'
+    ];
+
+    // Проверяем все обязательные поля из allInputDatas
+    const allFieldsFilled = requiredFields.every(field => 
+      //@ts-ignore
+      allInputDatas[field as keyof typeof allInputDatas].trim() !== ''
+    );
+
+    // Проверяем наличие изображения
+    const imageSelected = selectedFile !== null;
+
+    // Если checkbox включен, проверяем выбран ли товар
+    const conditionalGoodSelected = !allInputDatas.isShowButton || good.trim() !== '';
+
+    return allFieldsFilled && imageSelected && conditionalGoodSelected;
+  };
 
 
   //@ts-ignore
@@ -753,14 +787,23 @@ export const AddSale: FC = () => {
 
         <Box component="section" sx={sectionBox}>
           <ListItem>
-            <Button
-              variant="contained"
-              onClick={saveBtnHandler}
-              color="success"
-              sx={{ width: 200 }}
+            <Tooltip 
+              title={!isFormValid() ? "Fill in all inputs" : ""}
+              placement="top"
+              arrow
             >
-              Save special offer
-            </Button>
+              <span>
+                <Button
+                  variant="contained"
+                  onClick={saveBtnHandler}
+                  color="success"
+                  sx={{ width: 200 }}
+                  disabled={!isFormValid()}
+                >
+                  Save special offer
+                </Button>
+              </span>
+            </Tooltip>
           </ListItem>
         </Box>
       </Box>

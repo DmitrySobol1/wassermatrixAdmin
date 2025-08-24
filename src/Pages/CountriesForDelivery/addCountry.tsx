@@ -22,6 +22,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Snackbar from '@mui/material/Snackbar';
+import Tooltip from '@mui/material/Tooltip';
 
 export const AddCountry: FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,19 @@ export const AddCountry: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [countryForRender, setCountryForRender] = useState(initialCountry);
   const [alertShow, setAlertShow] = useState(false);
+
+  // Функция проверки заполненности всех полей
+  const isFormValid = () => {
+    const requiredFields = ['name_de', 'name_en', 'name_ru'];
+
+    // Проверяем все обязательные поля из countryForRender
+    const allFieldsFilled = requiredFields.every(field => 
+      //@ts-ignore
+      countryForRender[field as keyof typeof countryForRender].trim() !== ''
+    );
+
+    return allFieldsFilled;
+  };
 
   const modalStyle = {
     position: 'absolute',
@@ -181,14 +195,23 @@ export const AddCountry: FC = () => {
         </Box>
 
         <Box component="section" sx={sectionBox}>
-          <Button 
-            variant="contained" 
-            onClick={saveBtnHandler} 
-            color="success" 
-            sx={{ width: 200 }}
+          <Tooltip 
+            title={!isFormValid() ? "Fill in all inputs" : ""}
+            placement="top"
+            arrow
           >
-            Add country to app
-          </Button>
+            <span>
+              <Button 
+                variant="contained" 
+                onClick={saveBtnHandler} 
+                color="success" 
+                sx={{ width: 200 }}
+                disabled={!isFormValid()}
+              >
+                Add country to app
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       </Box>
 

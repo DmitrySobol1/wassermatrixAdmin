@@ -20,6 +20,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Snackbar from '@mui/material/Snackbar';
+import Tooltip from '@mui/material/Tooltip';
 
 export const AddFilter: FC = () => {
   const navigate = useNavigate();
@@ -34,6 +35,18 @@ export const AddFilter: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [typeForRender, setTypeForRender] = useState(initialType);
   const [alertShow, setAlertShow] = useState(false);
+
+  // Функция проверки заполненности всех полей
+  const isFormValid = () => {
+    const requiredFields = ['name_de', 'name_en', 'name_ru'];
+    
+    // Проверяем все обязательные поля из typeForRender
+    const allFieldsFilled = requiredFields.every(field => 
+      typeForRender[field as keyof typeof typeForRender].trim() !== ''
+    );
+    
+    return allFieldsFilled;
+  };
 
   const modalStyle = {
     position: 'absolute',
@@ -196,9 +209,23 @@ export const AddFilter: FC = () => {
      
 
         <Box component="section" sx={sectionBox}>
-          <Button variant="contained" onClick={saveBtnHandler} color="success" sx={{width:200}}>
-            Add filter to app
-          </Button>
+          <Tooltip 
+            title={!isFormValid() ? "Fill in all inputs" : ""}
+            placement="top"
+            arrow
+          >
+            <span>
+              <Button 
+                variant="contained" 
+                onClick={saveBtnHandler} 
+                color="success" 
+                sx={{width:200}}
+                disabled={!isFormValid()}
+              >
+                Add filter to app
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
 
 

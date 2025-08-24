@@ -25,6 +25,8 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+// import InputLabel from '@mui/material/InputLabel';
 
 export const EditGood: FC = () => {
   const navigate = useNavigate();
@@ -37,6 +39,42 @@ export const EditGood: FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [openModal, setOpenModal] = useState(false);
+
+  // Функция проверки заполненности всех полей
+  const isFormValid = () => {
+    if (!goodInfo) return false;
+
+    const requiredFields = [
+      'article',
+      'name_de',
+      'name_en', 
+      'name_ru',
+      'description_short_de',
+      'description_short_en',
+      'description_short_ru',
+      'description_long_de',
+      'description_long_en',
+      'description_long_ru',
+      'price_eu',
+      'delivery_price_de',
+      'delivery_price_inEu',
+      'delivery_price_outEu'
+    ];
+
+    // Проверяем все поля из goodInfo
+    const allFieldsFilled = requiredFields.every(field => {
+      const value = goodInfo[field as keyof GoodInfo];
+      return value !== undefined && value !== null && String(value).trim() !== '';
+    });
+
+    // Проверяем выбран ли тип
+    const typeSelected = type.trim() !== '';
+
+    // Проверяем наличие изображения (либо существующее, либо новое)
+    const imageExists = previewImage !== null;
+
+    return allFieldsFilled && typeSelected && imageExists;
+  };
 
   const language = 'en';
   const location = useLocation();
@@ -752,14 +790,23 @@ export const EditGood: FC = () => {
         
 
           <Box  sx={sectionBox }>
-            <Button
-              variant="contained"
-              onClick={saveBtnHandler}
-              color="success"
-              sx={{width: 200}}
+            <Tooltip 
+              title={!isFormValid() ? "Fill in all inputs" : ""}
+              placement="top"
+              arrow
             >
-              Save good
-            </Button>
+              <span>
+                <Button
+                  variant="contained"
+                  onClick={saveBtnHandler}
+                  color="success"
+                  sx={{width: 200}}
+                  disabled={!isFormValid()}
+                >
+                  Save good
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
 
 

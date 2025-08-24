@@ -25,6 +25,7 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
 
 
 // import { useNavigate } from 'react-router-dom';
@@ -58,6 +59,39 @@ export const AddNewGood: FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
+
+  // Функция проверки заполненности всех полей
+  const isFormValid = () => {
+    const requiredFields = [
+      'article',
+      'name_de',
+      'name_en', 
+      'name_ru',
+      'description_short_de',
+      'description_short_en',
+      'description_short_ru',
+      'description_long_de',
+      'description_long_en',
+      'description_long_ru',
+      'price_eu',
+      'delivery_price_de',
+      'delivery_price_inEu',
+      'delivery_price_outEu'
+    ];
+
+    // Проверяем все поля из allInputDatas
+    const allFieldsFilled = requiredFields.every(field => 
+      allInputDatas[field as keyof typeof allInputDatas].trim() !== ''
+    );
+
+    // Проверяем выбран ли тип
+    const typeSelected = type.trim() !== '';
+
+    // Проверяем выбрано ли изображение
+    const imageSelected = selectedFile !== null;
+
+    return allFieldsFilled && typeSelected && imageSelected;
+  };
 
   // получить список типов товаров
   useEffect(() => {
@@ -616,9 +650,23 @@ export const AddNewGood: FC = () => {
 
         <Box component="section" sx={sectionBox}>
       <ListItem>
-          <Button variant="contained" onClick={saveBtnHandler} color="success" sx={{width:200}}>
-            Save good
-          </Button>
+          <Tooltip 
+            title={!isFormValid() ? "Fill in all inputs" : ""}
+            placement="top"
+            arrow
+          >
+            <span>
+              <Button 
+                variant="contained" 
+                onClick={saveBtnHandler} 
+                color="success" 
+                sx={{width:200}}
+                disabled={!isFormValid()}
+              >
+                Save good
+              </Button>
+            </span>
+          </Tooltip>
       </ListItem>
         </Box>
      

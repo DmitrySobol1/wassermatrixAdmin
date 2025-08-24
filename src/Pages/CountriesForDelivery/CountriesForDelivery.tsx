@@ -30,6 +30,8 @@ export const CountriesForDelivery: FC = () => {
   const [arrayTypesForRender, setArrayTypesForRender] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  // Храним предыдущие значения полей
+  const [previousValues, setPreviousValues] = useState<{[key: string]: any}>({});
 
   //   const language = 'en';
   //   const domen = import.meta.env.VITE_DOMEN;
@@ -155,6 +157,17 @@ export const CountriesForDelivery: FC = () => {
   //     }
   //   }
 
+  // Сохраняем предыдущее значение при фокусе
+  function handleFocus(e: any) {
+    const countryId = e.target.id;
+    const fieldName = e.target.name;
+    const key = `${countryId}_${fieldName}`;
+    setPreviousValues(prev => ({
+      ...prev,
+      [key]: e.target.value
+    }));
+  }
+
   function inputHandler(e: any) {
     const newArray = arrayTypesForRender.map((item: any) => {
       const name = e.target.name;
@@ -169,11 +182,33 @@ export const CountriesForDelivery: FC = () => {
     setArrayTypesForRender(newArray);
   }
 
-  // Автосохранение при потере фокуса
+  // Проверка и сохранение при потере фокуса
   async function handleBlur(e: any) {
     const countryId = e.target.id || e.target.dataset.id;
-    const country = arrayTypesForRender.find((item: any) => item.id === countryId);
+    const fieldName = e.target.name;
+    const value = e.target.value.trim();
+    const key = `${countryId}_${fieldName}`;
     
+    // Проверяем, если поле пустое
+    if (value === '') {
+      // Возвращаем предыдущее значение
+      const previousValue = previousValues[key] || '';
+      const newArray = arrayTypesForRender.map((item: any) => {
+        if (item.id === countryId) {
+          return { ...item, [fieldName]: previousValue };
+        }
+        return item;
+      });
+      //@ts-ignore
+      setArrayTypesForRender(newArray);
+      
+      // Показываем ошибку
+      setSnackbarMessage("Input can't be empty");
+      setSnackbarOpen(true);
+      return;
+    }
+    
+    const country = arrayTypesForRender.find((item: any) => item.id === countryId);
     if (country) {
       await saveCountry(country);
     }
@@ -289,6 +324,7 @@ export const CountriesForDelivery: FC = () => {
                     name="name_de"
                     id={item.id}
                     onChange={(e) => inputHandler(e)}
+                    onFocus={(e) => handleFocus(e)}
                     onBlur={(e) => handleBlur(e)}
                     value={item.name_de}
                     slotProps={{
@@ -307,6 +343,7 @@ export const CountriesForDelivery: FC = () => {
                     name="name_en"
                     id={item.id}
                     onChange={(e) => inputHandler(e)}
+                    onFocus={(e) => handleFocus(e)}
                     onBlur={(e) => handleBlur(e)}
                     value={item.name_en}
                     slotProps={{
@@ -325,6 +362,7 @@ export const CountriesForDelivery: FC = () => {
                     name="name_ru"
                     id={item.id}
                     onChange={(e) => inputHandler(e)}
+                    onFocus={(e) => handleFocus(e)}
                     onBlur={(e) => handleBlur(e)}
                     value={item.name_ru}
                     slotProps={{

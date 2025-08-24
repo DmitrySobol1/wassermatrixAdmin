@@ -17,6 +17,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 
@@ -39,9 +40,11 @@ export const Tags: FC = () => {
   const [newTagDescription, setNewTagDescription] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'error' | 'warning' | 'success'>('error');
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState('');
   const [editTagDescription, setEditTagDescription] = useState('');
+  const [isCheckingTagUsage, setIsCheckingTagUsage] = useState(false);
 
 //   const language = 'en';
 //   const domen = import.meta.env.VITE_DOMEN;
@@ -79,6 +82,7 @@ export const Tags: FC = () => {
     // Валидация обязательных полей
     if (!newTagName.trim() || !newTagDescription.trim()) {
       setSnackbarMessage('Both name and description are required');
+      setSnackbarSeverity('error');
       setSnackbarOpen(true);
       return;
     }
@@ -97,6 +101,10 @@ export const Tags: FC = () => {
         // Сбрасываем состояние
         resetAddingState();
         
+        setSnackbarMessage('Tag created successfully');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        
         console.log('Tag created successfully:', response.data.tag);
       }
     } catch (error: any) {
@@ -104,9 +112,11 @@ export const Tags: FC = () => {
       
       if (error.response?.data?.error) {
         setSnackbarMessage(error.response.data.error);
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       } else {
         setSnackbarMessage('Error creating tag. Please try again.');
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
     }
@@ -143,14 +153,35 @@ export const Tags: FC = () => {
     }, 150); // Небольшая задержка для корректной работы
   };
 
-  // Функция для удаления тега
+  // Функция для проверки использования тега и удаления
   const handleDeleteTag = async (tagId: string) => {
+    setIsCheckingTagUsage(true);
+    
     try {
-      const response = await axios.post('/admin_delete_tag', {
+      // Сначала проверяем, используется ли тег
+      const checkResponse = await axios.post('/admin_check_tag_usage', {
+        tagId: tagId
+      });
+
+      console.log('Check response:', checkResponse.data);
+
+      if (checkResponse.data.isUsed) {
+        // Если тег используется, показываем предупреждение
+        setSnackbarMessage(`You can't delete this tag, because some users have this tag (${checkResponse.data.usersCount} users)`);
+        setSnackbarSeverity('warning');
+        setSnackbarOpen(true);
+        setOpenModal(false);
+        return;
+      }
+
+      // Если тег не используется, удаляем его
+      const deleteResponse = await axios.post('/admin_delete_tag', {
         id: tagId
       });
 
-      if (response.data.status === 'ok') {
+      console.log('Delete response:', deleteResponse.data);
+      
+      if (deleteResponse.data.status === 'ok') {
         // Удаляем тег из массива
         //@ts-ignore
         setArrayTagsForRender(prev => prev.filter(tag => tag._id !== tagId));
@@ -158,7 +189,17 @@ export const Tags: FC = () => {
         // Закрываем модальное окно
         setOpenModal(false);
         
-        console.log('Tag deleted successfully:', response.data.deletedTag);
+        setSnackbarMessage('Tag deleted successfully');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        
+        console.log('Tag deleted successfully:', deleteResponse.data.deletedTag);
+      } else {
+        console.error('Delete failed with response:', deleteResponse.data);
+        setSnackbarMessage(deleteResponse.data.error || 'Failed to delete tag');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        setOpenModal(false);
       }
     } catch (error: any) {
       console.error('Error deleting tag:', error);
@@ -168,11 +209,15 @@ export const Tags: FC = () => {
       
       if (error.response?.data?.error) {
         setSnackbarMessage(`Error: ${error.response.data.error}`);
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       } else {
         setSnackbarMessage('Error deleting tag. Please try again.');
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
+    } finally {
+      setIsCheckingTagUsage(false);
     }
   };
 
@@ -195,6 +240,7 @@ export const Tags: FC = () => {
     // Валидация обязательных полей
     if (!editTagName.trim() || !editTagDescription.trim()) {
       setSnackbarMessage('Both name and description are required');
+      setSnackbarSeverity('error');
       setSnackbarOpen(true);
       return;
     }
@@ -219,6 +265,10 @@ export const Tags: FC = () => {
         // Сбрасываем состояние редактирования
         handleCancelEdit();
         
+        setSnackbarMessage('Tag updated successfully');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        
         console.log('Tag updated successfully:', response.data.tag);
       }
     } catch (error: any) {
@@ -226,9 +276,11 @@ export const Tags: FC = () => {
       
       if (error.response?.data?.error) {
         setSnackbarMessage(error.response.data.error);
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       } else {
         setSnackbarMessage('Error updating tag. Please try again.');
+        setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
     }
@@ -497,11 +549,13 @@ export const Tags: FC = () => {
             <Button 
               variant="contained" 
               color="error"
+              disabled={isCheckingTagUsage}
               onClick={() => {
                 handleDeleteTag(idToDelete);
               }}
+              startIcon={isCheckingTagUsage ? <CircularProgress size={16} color="inherit" /> : null}
             >
-              Delete
+              {isCheckingTagUsage ? 'Checking...' : 'Delete'}
             </Button>
             <Button variant="outlined" onClick={() => setOpenModal(false)}>
               Cancel
@@ -519,7 +573,7 @@ export const Tags: FC = () => {
       >
         <Alert 
           onClose={() => setSnackbarOpen(false)} 
-          severity="error"
+          severity={snackbarSeverity}
           sx={{ width: '100%' }}
         >
           {snackbarMessage}

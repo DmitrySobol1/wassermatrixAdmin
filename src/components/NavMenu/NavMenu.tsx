@@ -3,13 +3,15 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-// import Button from '@mui/material/Button';
+import Button from '@mui/material/Button';
 // import IconButton from '@mui/material/IconButton';
 // import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 import Link from '@mui/material/Link';
 
@@ -18,6 +20,13 @@ import Link from '@mui/material/Link';
 
 export default function NavMenu() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/signin');
+  };
 
   // Функция для определения активного пункта меню
   const isActive = (path: string) => {
@@ -115,7 +124,14 @@ export default function NavMenu() {
             </Link>
           </Typography>
 
-          {/* <Button color="inherit">Login</Button> */}
+          <Button 
+            color="inherit" 
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            sx={{ ml: 2 }}
+          >
+            Logout
+          </Button>
    
         </Toolbar>
       </AppBar>

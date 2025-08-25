@@ -12,9 +12,11 @@ import Alert from '@mui/material/Alert';
 
 import { useNavigate } from 'react-router-dom';
 import axios from '../../axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const SignIn: FC = () => {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +38,7 @@ export const SignIn: FC = () => {
       });
 
       if (response.data.status === 'success') {
+        authLogin(); // Обновляем состояние авторизации
         navigate('/goods-page');
       } else {
         setError('Invalid login or password');
@@ -76,7 +79,7 @@ export const SignIn: FC = () => {
           </Typography>
           
           <Typography variant="h6" component="h2" textAlign="center" mb={3}>
-            Admin Login
+            Admin panel
           </Typography>
 
           {error && (

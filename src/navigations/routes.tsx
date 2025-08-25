@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
-
+import type { ComponentType, JSX } from 'react';
+import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 
 import { SignIn } from '../Pages/SignIn/SignIn';
 import { Goods } from '../Pages/Goods/Goods';
@@ -25,40 +25,37 @@ import { GoodsStatistic } from '../Pages/Statistic/GoodsStatistic';
 
 interface Route {
   path: string;
-  Component: ComponentType;
+  Component?: ComponentType;
   title?: string;
-  
+  element?: JSX.Element;
 }
 
 export const routes: Route[] = [
   { path: '/', Component: SignIn },
-  { path: '/goods-page', Component: Goods },
-  { path: '/sales-page', Component: Sales },
-  { path: '/addsale-page', Component: AddSale },
-  { path: '/editsale-page', Component: EditSale },
-  { path: '/add_new_good-page', Component: AddNewGood },
-  { path: '/edit_good-page', Component: EditGood },
+  { path: '/signin', Component: SignIn },
+  { path: '/goods-page', element: <ProtectedRoute><Goods /></ProtectedRoute> },
+  { path: '/sales-page', element: <ProtectedRoute><Sales /></ProtectedRoute> },
+  { path: '/addsale-page', element: <ProtectedRoute><AddSale /></ProtectedRoute> },
+  { path: '/editsale-page', element: <ProtectedRoute><EditSale /></ProtectedRoute> },
+  { path: '/add_new_good-page', element: <ProtectedRoute><AddNewGood /></ProtectedRoute> },
+  { path: '/edit_good-page', element: <ProtectedRoute><EditGood /></ProtectedRoute> },
   
-  { path: '/filters-page', Component: Filters },
+  { path: '/filters-page', element: <ProtectedRoute><Filters /></ProtectedRoute> },
   
-  { path: '/countries-page', Component: CountriesForDelivery },
+  { path: '/countries-page', element: <ProtectedRoute><CountriesForDelivery /></ProtectedRoute> },
 
-  { path: '/clients-page', Component: Clients },
-  { path: '/clientorder-page', Component: ClientOrder },
+  { path: '/clients-page', element: <ProtectedRoute><Clients /></ProtectedRoute> },
+  { path: '/clientorder-page', element: <ProtectedRoute><ClientOrder /></ProtectedRoute> },
 
-  { path: '/carts-page', Component: Carts },
+  { path: '/carts-page', element: <ProtectedRoute><Carts /></ProtectedRoute> },
   
-  { path: '/orders-page', Component: Orders },
+  { path: '/orders-page', element: <ProtectedRoute><Orders /></ProtectedRoute> },
   
-  { path: '/settings-page', Component: Settings },
-  { path: '/tags-page', Component: Tags },
-  { path: '/adminslist-page', Component: AdminsList },
+  { path: '/settings-page', element: <ProtectedRoute><Settings /></ProtectedRoute> },
+  { path: '/tags-page', element: <ProtectedRoute><Tags /></ProtectedRoute> },
+  { path: '/adminslist-page', element: <ProtectedRoute><AdminsList /></ProtectedRoute> },
   
-  { path: '/router_statistic-page', Component: RouterStatistic },
-  { path: '/statistic-page', Component: Statistic },
-  { path: '/goods_statistic-page', Component: GoodsStatistic },
-
-  
-  
-  
+  { path: '/router_statistic-page', element: <ProtectedRoute><RouterStatistic /></ProtectedRoute> },
+  { path: '/statistic-page', element: <ProtectedRoute><Statistic /></ProtectedRoute> },
+  { path: '/goods_statistic-page', element: <ProtectedRoute><GoodsStatistic /></ProtectedRoute> },
 ];

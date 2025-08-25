@@ -17,6 +17,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -50,6 +51,9 @@ export const AdminsList: FC = () => {
   const [editingAdminId, setEditingAdminId] = useState<string | null>(null);
   const [editAdminName, setEditAdminName] = useState('');
   const [editAdminTlgid, setEditAdminTlgid] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaveLoading, setIsSaveLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
  const wrapperBox = {
     margin: 'auto',
@@ -65,6 +69,7 @@ export const AdminsList: FC = () => {
   // получить список администраторов
   useEffect(() => {
     const fetchAdmins = async () => {
+      setIsLoading(true)
       try {
         const admins = await axios.get('/admin_get_admins');
         console.log('ADMINS=', admins.data);
@@ -75,6 +80,8 @@ export const AdminsList: FC = () => {
         setSnackbarMessage('Error loading admins list');
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
+      } finally {
+        setIsLoading(false)
       }
     };
 
@@ -98,6 +105,8 @@ export const AdminsList: FC = () => {
       setSnackbarOpen(true);
       return;
     }
+
+    setIsSaveLoading(true);
 
     try {
       const response = await axios.post('/admin_add_admin', {
@@ -130,6 +139,8 @@ export const AdminsList: FC = () => {
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
+    } finally {
+      setIsSaveLoading(false);
     }
   };
 
@@ -166,6 +177,8 @@ export const AdminsList: FC = () => {
 
   // Функция для удаления администратора
   const handleDeleteAdmin = async (adminId: string) => {
+    setIsDeleteLoading(true);
+
     try {
       const response = await axios.post('/admin_delete_admin', {
         id: adminId
@@ -199,6 +212,8 @@ export const AdminsList: FC = () => {
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
+    } finally {
+      setIsDeleteLoading(false);
     }
   };
 
@@ -233,6 +248,8 @@ export const AdminsList: FC = () => {
       setSnackbarOpen(true);
       return;
     }
+
+    setIsSaveLoading(true);
 
     try {
       const response = await axios.post('/admin_update_admin', {
@@ -270,6 +287,8 @@ export const AdminsList: FC = () => {
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
+    } finally {
+      setIsSaveLoading(false);
     }
   };
 
@@ -301,6 +320,29 @@ export const AdminsList: FC = () => {
     }, 150);
   };
 
+
+  if (isLoading) {
+      return (
+        <>
+          <NavMenu />
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+            flexDirection: 'column',
+            gap: 2
+          }}>
+            <CircularProgress size={60} />
+            <Typography variant="h6" color="text.secondary">
+              Loading ...
+            </Typography>
+          </Box>
+        </>
+      );
+    }
+
+
   return (
     <>
       <NavMenu />
@@ -331,8 +373,9 @@ export const AdminsList: FC = () => {
             <Button
               variant="contained"
               color={isAddingAdmin ? "success" : "primary"}
-              startIcon={isAddingAdmin ? <SaveIcon /> : <AddCircleSharpIcon />}
+              startIcon={isSaveLoading && isAddingAdmin ? <CircularProgress size={20} color="inherit" /> : (isAddingAdmin ? <SaveIcon /> : <AddCircleSharpIcon />)}
               data-save-button
+              disabled={isSaveLoading && isAddingAdmin}
               onClick={() => {
                 if (isAddingAdmin) {
                   handleCreateAdmin();
@@ -457,9 +500,14 @@ export const AdminsList: FC = () => {
                           aria-label="save"
                           color="success"
                           data-edit-button
+                          disabled={isSaveLoading && editingAdminId === admin._id}
                           onClick={() => handleSaveEdit(admin._id)}
                         >
-                          <SaveIcon />
+                          {isSaveLoading && editingAdminId === admin._id ? (
+                            <CircularProgress size={20} color="inherit" />
+                          ) : (
+                            <SaveIcon />
+                          )}
                         </IconButton>
                       </Tooltip>
 
@@ -538,6 +586,8 @@ export const AdminsList: FC = () => {
             <Button 
               variant="contained" 
               color="error"
+              disabled={isDeleteLoading}
+              startIcon={isDeleteLoading ? <CircularProgress size={20} color="inherit" /> : null}
               onClick={() => {
                 handleDeleteAdmin(idToDelete);
               }}

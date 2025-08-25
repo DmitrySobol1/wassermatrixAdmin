@@ -322,7 +322,7 @@ export const Tags: FC = () => {
     }, 150);
   };
 
-  if (isLoading) {
+  if (isLoading) { 
     return (
       <>
         <NavMenu />

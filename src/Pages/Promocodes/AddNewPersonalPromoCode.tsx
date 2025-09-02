@@ -63,28 +63,28 @@ export const AddNewPersonalPromoCode: FC = () => {
 
   // Функция валидации промокода
   //@ts-ignore
-  const validatePromocode = (value: string) => {
-    // Проверка на пробелы (более одного слова)
-    if (value.includes(' ')) {
-      return {
-        isValid: false,
-        message: 'Promocode must be a single word without spaces'
-      };
-    }
+  // const validatePromocode = (value: string) => {
+  //   // Проверка на пробелы (более одного слова)
+  //   if (value.includes(' ')) {
+  //     return {
+  //       isValid: false,
+  //       message: 'Promocode must be a single word without spaces'
+  //     };
+  //   }
 
-    // Проверка на длину
-    if (value.length > 15) {
-      return {
-        isValid: false,
-        message: 'Promocode must be no more than 15 characters'
-      };
-    }
+  //   // Проверка на длину
+  //   if (value.length > 15) {
+  //     return {
+  //       isValid: false,
+  //       message: 'Promocode must be no more than 15 characters'
+  //     };
+  //   }
 
-    return {
-      isValid: true,
-      message: ''
-    };
-  };
+  //   return {
+  //     isValid: true,
+  //     message: ''
+  //   };
+  // };
 
   // Функция проверки заполненности всех полей
   const isFormValid = () => {

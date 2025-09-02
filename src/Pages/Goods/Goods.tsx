@@ -430,7 +430,7 @@ export const Goods: FC = () => {
             //  onClick={()=>navigate('/add_new_good-page')}>
             onClick={() => navigate('/add_new_good-page')}
           >
-            Добавить новый товар
+            Add new good 
           </Button>
         </Box>
 

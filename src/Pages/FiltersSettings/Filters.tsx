@@ -43,8 +43,7 @@ export const Filters: FC = () => {
   const [isCheckingFilterUsage, setIsCheckingFilterUsage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  //   const language = 'en';
-  //   const domen = import.meta.env.VITE_DOMEN;
+  
 
   // получить список типов товаров + товары
   useEffect(() => {

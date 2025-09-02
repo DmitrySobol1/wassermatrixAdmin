@@ -103,6 +103,17 @@ export default function NavMenu() {
             
             <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
               <Link
+                href="#/promocodes-page"
+                underline="hover"
+                id="3"
+                style={getMenuItemStyle('/promocodes-page')}
+              >
+                {'Promocodes'}
+              </Link>
+            </Typography>
+            
+            <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
+              <Link
                 href="#/router_statistic-page"
                 underline="hover"
                 id="3"

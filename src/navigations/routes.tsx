@@ -14,6 +14,9 @@ import { CountriesForDelivery } from '../Pages/CountriesForDelivery/CountriesFor
 import { Orders } from '../Pages/Orders/Orders';
 import { Clients } from '../Pages/Clients/Clients';
 import { ClientOrder } from '../Pages/Clients/ClientOrder';
+import { Promocodes } from '../Pages/Promocodes/Promocodes';
+import { AddNewPromoCode } from '../Pages/Promocodes/AddNewPromoCode';
+import { AddNewPersonalPromoCode } from '../Pages/Promocodes/AddNewPersonalPromoCode';
 import { Settings } from '../Pages/Settings/Settings';
 import { AdminsList } from '../Pages/Settings/AdminsList';
 import { Tags } from '../Pages/Settings/Tags';
@@ -51,6 +54,10 @@ export const routes: Route[] = [
   
   { path: '/orders-page', element: <ProtectedRoute><Orders /></ProtectedRoute> },
   
+  { path: '/promocodes-page', element: <ProtectedRoute><Promocodes /></ProtectedRoute> },
+  { path: '/add_new_promocode-page', element: <ProtectedRoute><AddNewPromoCode /></ProtectedRoute> },
+  { path: '/add_new_personal_promocode-page', element: <ProtectedRoute><AddNewPersonalPromoCode /></ProtectedRoute> },
+
   { path: '/settings-page', element: <ProtectedRoute><Settings /></ProtectedRoute> },
   { path: '/tags-page', element: <ProtectedRoute><Tags /></ProtectedRoute> },
   { path: '/adminslist-page', element: <ProtectedRoute><AdminsList /></ProtectedRoute> },

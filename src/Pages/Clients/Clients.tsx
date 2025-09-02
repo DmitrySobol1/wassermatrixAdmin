@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import axios from '../../axios';
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import NavMenu from '../../components/NavMenu/NavMenu';
 
@@ -10,6 +10,9 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import IconButton from '@mui/material/IconButton';
 import TelegramIcon from '@mui/icons-material/Telegram';
@@ -24,12 +27,28 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 export const Clients: FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [arrayUsersForRender, setArrayUsersForRender] = useState([]);
+  const [originalUsers, setOriginalUsers] = useState([]); // Оригинальный список пользователей
 //   const [allOrders, setAllOrders] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
+
+  // Ref для debounce таймера 
+  //@ts-ignore
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Инициализация searchTerm из URL параметров
+  useEffect(() => {
+    const tlgidFromUrl = searchParams.get('tlgid');
+    if (tlgidFromUrl) {
+      setSearchTerm(tlgidFromUrl);
+    }
+  }, [searchParams]);
 
   // получить список пользователей и заказов
   useEffect(() => {
@@ -70,6 +89,7 @@ export const Clients: FC = () => {
         });
 
         setArrayUsersForRender(arrayUsersForRender);
+        setOriginalUsers(arrayUsersForRender); // Сохраняем оригинальный список
 
         console.log('formattedUsers', arrayUsersForRender);
       } catch (error) {
@@ -80,6 +100,90 @@ export const Clients: FC = () => {
     };
 
     fetchData();
+  }, []);
+
+  // Выполняем поиск при изменении searchTerm (включая инициализацию из URL)
+  useEffect(() => {
+    if (originalUsers.length > 0) {
+      searchUsers(searchTerm);
+    }
+  }, [searchTerm, originalUsers]);
+
+  // Функция поиска пользователей по tlgid
+  const searchUsers = (searchValue: string) => {
+    setIsSearching(true);
+    
+    if (!searchValue.trim()) {
+      // Если поиск пустой, показываем всех пользователей
+      setArrayUsersForRender(originalUsers);
+      setIsSearching(false);
+      return;
+    }
+
+    // Фильтруем пользователей по tlgid
+    //@ts-ignore
+    const filteredUsers = originalUsers.filter(user => 
+      //@ts-ignore
+      user.tlgid.toString().includes(searchValue.trim())
+    );
+
+    setArrayUsersForRender(filteredUsers);
+    setIsSearching(false);
+  };
+
+  // Функция для обновления URL параметров
+  const updateUrlParams = (tlgidValue: string) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    
+    if (tlgidValue.trim()) {
+      newSearchParams.set('tlgid', tlgidValue.trim());
+    } else {
+      newSearchParams.delete('tlgid');
+    }
+    
+    setSearchParams(newSearchParams);
+  };
+
+  // Обработчик изменения поля поиска с debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Очищаем предыдущий таймер
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Устанавливаем новый таймер с задержкой 1 секунда
+    debounceTimer.current = setTimeout(() => {
+      updateUrlParams(value);
+    }, 1000);
+  };
+
+  // Обработчик нажатия Enter
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Очищаем таймер и обновляем URL немедленно
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+      updateUrlParams(searchTerm);
+    }
+  };
+
+  // Функция очистки поля поиска
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    updateUrlParams('');
+  };
+
+  // Cleanup таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
   }, []);
 
   // Функция для обновления тегов пользователя
@@ -156,6 +260,41 @@ export const Clients: FC = () => {
         </Box>
 
         <Box sx={sectionBox}>
+          <TextField
+            fullWidth
+            label="🔍 Search by Telegram ID"
+            variant="outlined"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onKeyPress={handleSearchKeyPress}
+            placeholder="🔍 telegram id..."
+            disabled={isSearching}
+            sx={{ maxWidth: 250 }}
+            helperText={isSearching ? "Searching..." : ''}
+            InputProps={{
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="clear search"
+                    onClick={handleClearSearch}
+                    edge="end"
+                    size="small"
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
+        <Box sx={sectionBox}>
+          {searchTerm && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {arrayUsersForRender.length} client{arrayUsersForRender.length !== 1 ? 's' : ''} found
+              {searchTerm && ` for "${searchTerm}"`}
+            </Typography>
+          )}
          
           {arrayUsersForRender.map((user: any) => (
             <Stack

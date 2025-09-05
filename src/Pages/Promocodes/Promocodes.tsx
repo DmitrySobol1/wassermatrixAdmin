@@ -42,6 +42,7 @@ export const Promocodes: FC = () => {
 
   const [arrayPromocodesForRender, setArrayPromocodesForRender] = useState([]);
   const [arrayPersonalPromocodesForRender, setArrayPersonalPromocodesForRender] = useState([]);
+  const [arrayInactivePromocodesForRender, setArrayInactivePromocodesForRender] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [promocodeCode, setPromocodeCode] = useState('');
@@ -95,6 +96,26 @@ export const Promocodes: FC = () => {
         console.log('PERSONAL PROMOCODES=', personalPromocodes.data);
         //@ts-ignore
         setArrayPersonalPromocodesForRender(personalPromocodes.data);
+        
+        // Загружаем неактивные промокоды (general и personal)
+        const inactivePromocodes = await Promise.all([
+          axios.get('/admin_get_promocodes?isActive=false'),
+          axios.get('/admin_get_personal_promocodes?isActive=false')
+        ]);
+        
+        const inactiveGeneral = inactivePromocodes[0].data.map((promocode: any) => ({
+          ...promocode,
+          type: 'general'
+        }));
+        const inactivePersonal = inactivePromocodes[1].data.map((promocode: any) => ({
+          ...promocode,
+          type: 'personal'
+        }));
+        
+        const allInactivePromocodes = [...inactiveGeneral, ...inactivePersonal];
+        console.log('INACTIVE PROMOCODES=', allInactivePromocodes);
+        //@ts-ignore
+        setArrayInactivePromocodesForRender(allInactivePromocodes);
       } catch (error) {
         console.error('Ошибка при выполнении запроса:', error);
       } finally {
@@ -113,15 +134,19 @@ export const Promocodes: FC = () => {
 
   // Получить текущий массив промокодов в зависимости от активной вкладки
   const getCurrentPromocodes = () => {
-    return activeTab === 0 ? arrayPromocodesForRender : arrayPersonalPromocodesForRender;
+    if (activeTab === 0) return arrayPromocodesForRender;
+    if (activeTab === 1) return arrayPersonalPromocodesForRender;
+    return arrayInactivePromocodesForRender;
   };
 
   // Обновить текущий массив промокодов
   const updateCurrentPromocodes = (updateFn: any) => {
     if (activeTab === 0) {
       setArrayPromocodesForRender(updateFn);
-    } else {
+    } else if (activeTab === 1) {
       setArrayPersonalPromocodesForRender(updateFn);
+    } else {
+      setArrayInactivePromocodesForRender(updateFn);
     }
   };
 
@@ -301,6 +326,8 @@ export const Promocodes: FC = () => {
     });
   };
 
+  // console.log('PROMOOOOO=', arrayInactivePromocodesForRender)
+
   if (isLoading) { 
     return (
       <>
@@ -355,7 +382,7 @@ export const Promocodes: FC = () => {
             variant="contained"
             startIcon={<AddCircleSharpIcon />}
             onClick={() => navigate('/add_new_personal_promocode-page')}
-            sx={{backgroundColor: '#0e4f8fff'}}
+            sx={{backgroundColor: '#9c27b0'}}
           >
             Add personal promocode
           </Button>
@@ -365,6 +392,7 @@ export const Promocodes: FC = () => {
           <Tabs value={activeTab} onChange={handleTabChange} aria-label="promocodes tabs">
             <Tab label="General" />
             <Tab label="Personal" />
+            <Tab label="Expired and Used" />
           </Tabs>
         </Box>
 
@@ -403,7 +431,7 @@ export const Promocodes: FC = () => {
                 <LabelIcon color="primary" sx={{ mr: 1 }} />
                 
                 <Box sx={{ flexGrow: 1 }}>
-                  {editingPromocodeId === promocode._id ? (
+                  {activeTab !== 2 && editingPromocodeId === promocode._id ? (
                     // Режим редактирования
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -486,6 +514,16 @@ export const Promocodes: FC = () => {
                         <Typography variant="h6" component="div">
                           {promocode.code}
                         </Typography>
+                        
+                        {/* Chip для третьей вкладки - показываем тип промокода */}
+                        {activeTab === 2 && (
+                          <Chip
+                            label={promocode.type === 'general' ? 'general' : 'personal'}
+                            variant="filled"
+                            size="small"
+                            color={promocode.type === 'general' ? 'primary' : 'secondary'}
+                          />
+                        )}
                        
                         {promocode.saleInPercent > 0 && (
                           <Chip
@@ -497,25 +535,45 @@ export const Promocodes: FC = () => {
                         )}
                       </Box>
 
-                      {activeTab === 1 &&    
+                      {activeTab === 1  &&    
                         <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
                          client telegram id: {promocode.tlgid.tlgid}
                         </Typography>
                       }
 
+                      
+
                       <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
                         {promocode.description_admin}
                       </Typography>
+
+                      {activeTab === 0  &&    
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                         quantity of users applied code: {promocode.tlgid.length}
+                        </Typography>
+                      }
+                      
+                      {activeTab === 2  &&    
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                         {promocode.type === 'general' ? `quantity of users applied code: ${promocode.tlgid.length}` : ''}
+                         {promocode.type === 'personal' ? `used by user: ${promocode.isUsed ? 'yes' : 'no'}` : ''}
+                        </Typography>
+                      }
+
+
+
                       <Typography variant="body2" color="text.secondary">
                         Expires: {formatDate(promocode.expiryDate)}
                       </Typography>
+
+                       
                       
                     </>
                   )}
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  {editingPromocodeId === promocode._id ? (
+                  {activeTab !== 2 && editingPromocodeId === promocode._id ? (
                     // Кнопки в режиме редактирования
                     <>
                       <Tooltip title="Save changes">
@@ -543,42 +601,48 @@ export const Promocodes: FC = () => {
                   ) : (
                     // Кнопки в режиме просмотра
                     <>
-                      <Tooltip title="Edit promocode">
-                        <IconButton
-                          aria-label="edit"
-                          color="primary"
-                          onClick={() => handleStartEdit(promocode)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {/* Кнопка редактирования только для первых двух вкладок */}
+                      {activeTab !== 2 && (
+                        <Tooltip title="Edit promocode">
+                          <IconButton
+                            aria-label="edit"
+                            color="primary"
+                            onClick={() => handleStartEdit(promocode)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
 
-                      {/* Кнопка Show client только для персональных промокодов */}
-                      {activeTab === 1 && promocode.tlgid && (
+                      {/* Кнопка Show client для персональных промокодов */}
+                      {((activeTab === 1 && promocode.tlgid) || (activeTab === 2 && promocode.type === 'personal' && promocode.tlgid)) && (
                         <Tooltip title="Show client">
                           <IconButton
                             aria-label="show-client"
                             color="info"
-                            onClick={() => handleShowClient(promocode.tlgid.tlgid)}
+                            onClick={() => handleShowClient(activeTab === 1 ? promocode.tlgid.tlgid : promocode.tlgid)}
                           >
                             <PersonIcon />
                           </IconButton>
                         </Tooltip>
                       )}
 
-                      <Tooltip title="Deactivate promocode">
-                        <IconButton
-                          aria-label="deactivate"
-                          onClick={() => {
-                            setPromocodeCode(promocode.code);
-                            setIdToDelete(promocode._id);
-                            setOpenModal(true);
-                          }}
-                          sx={{ color: red[500] }}
-                        >
-                          <StopCircleIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {/* Кнопка деактивации только для первых двух вкладок */}
+                      {activeTab !== 2 && (
+                        <Tooltip title="Deactivate promocode">
+                          <IconButton
+                            aria-label="deactivate"
+                            onClick={() => {
+                              setPromocodeCode(promocode.code);
+                              setIdToDelete(promocode._id);
+                              setOpenModal(true);
+                            }}
+                            sx={{ color: red[500] }}
+                          >
+                            <StopCircleIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </>
                   )}
                 </Box>

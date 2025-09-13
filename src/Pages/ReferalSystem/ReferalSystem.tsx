@@ -106,6 +106,22 @@ export const ReferalSystem : FC = () => {
       return;
     }
 
+    // Валидация положительных значений
+    const qtyValue = Number(newQty.trim());
+    const saleValue = Number(newSale.trim());
+    if (isNaN(qtyValue) || qtyValue <= 0) {
+      setSnackbarMessage('Qty must be a positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+    if (isNaN(saleValue) || saleValue <= 0) {
+      setSnackbarMessage('Sale must be a positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     setIsSavingItem(true);
     try {
       const response = await axios.post('/referals_promoForQuantity', {
@@ -249,6 +265,22 @@ export const ReferalSystem : FC = () => {
       return;
     }
 
+    // Валидация положительных значений
+    const qtyValue = Number(editQty.trim());
+    const saleValue = Number(editSale.trim());
+    if (isNaN(qtyValue) || qtyValue <= 0) {
+      setSnackbarMessage('Qty must be a positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+    if (isNaN(saleValue) || saleValue <= 0) {
+      setSnackbarMessage('Sale must be a positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       const response = await axios.put(`/referals_promoForQuantity/${itemId}`, {
         qty: parseInt(editQty.trim()),
@@ -294,9 +326,18 @@ export const ReferalSystem : FC = () => {
       return;
     }
 
+    // Валидация на отрицательные значения
+    const saleValue = Number(editPurchaseSale.trim());
+    if (isNaN(saleValue) || saleValue < 0) {
+      setSnackbarMessage('Sale value must be 0 or positive number');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       const response = await axios.put(`/referals_promoForPurchase/${itemId}`, {
-        sale: parseInt(editPurchaseSale.trim())
+        sale: Number(editPurchaseSale.trim())
       });
 
       if (response.data.status === 'ok') {
@@ -482,12 +523,18 @@ export const ReferalSystem : FC = () => {
                 placeholder="Qty"
                 type="number"
                 value={newQty}
-                onChange={(e) => setNewQty(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || (Number(value) > 0 && !isNaN(Number(value)))) {
+                    setNewQty(value);
+                  }
+                }}
                 onKeyPress={handleKeyPress}
                 onBlur={handleBlur}
                 data-tag-input
                 sx={{ width: 120 }}
                 autoFocus
+                inputProps={{ min: 1 }}
               />
             )}
             
@@ -497,11 +544,17 @@ export const ReferalSystem : FC = () => {
                 placeholder="Sale %"
                 type="number"
                 value={newSale}
-                onChange={(e) => setNewSale(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || (Number(value) > 0 && !isNaN(Number(value)))) {
+                    setNewSale(value);
+                  }
+                }}
                 onKeyPress={handleKeyPress}
                 onBlur={handleBlur}
                 data-tag-input
                 sx={{ width: 120 }}
+                inputProps={{ min: 1 }}
               />
             )}
 
@@ -566,24 +619,36 @@ export const ReferalSystem : FC = () => {
                         size="small"
                         type="number"
                         value={editQty}
-                        onChange={(e) => setEditQty(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || (Number(value) > 0 && !isNaN(Number(value)))) {
+                            setEditQty(value);
+                          }
+                        }}
                         onKeyPress={(e) => handleEditKeyPress(e, item._id)}
                         onBlur={handleEditBlur}
                         data-edit-input
                         placeholder="Qty"
                         sx={{ width: 120 }}
                         autoFocus
+                        inputProps={{ min: 1 }}
                       />
                       <TextField
                         size="small"
                         type="number"
                         value={editSale}
-                        onChange={(e) => setEditSale(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || (Number(value) > 0 && !isNaN(Number(value)))) {
+                            setEditSale(value);
+                          }
+                        }}
                         onKeyPress={(e) => handleEditKeyPress(e, item._id)}
                         onBlur={handleEditBlur}
                         data-edit-input
                         placeholder="Sale %"
                         sx={{ width: 120 }}
+                        inputProps={{ min: 1 }}
                       />
                       <TextField
                         size="small"
@@ -726,13 +791,19 @@ export const ReferalSystem : FC = () => {
                         size="small"
                         type="number"
                         value={editPurchaseSale}
-                        onChange={(e) => setEditPurchaseSale(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || (Number(value) >= 0 && !isNaN(Number(value)))) {
+                            setEditPurchaseSale(value);
+                          }
+                        }}
                         onKeyPress={(e) => handlePurchaseEditKeyPress(e, item._id)}
                         onBlur={handleEditBlur}
                         data-edit-input
                         placeholder="Sale %"
                         sx={{ width: 80 }}
                         autoFocus
+                        inputProps={{ min: 0 }}
                       />
                       <Typography variant="body1" component="div">%</Typography>
                       <Typography variant="body2" component="div">

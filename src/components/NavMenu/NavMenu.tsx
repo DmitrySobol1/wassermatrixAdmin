@@ -8,12 +8,16 @@ import Button from '@mui/material/Button';
 // import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 // import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 import Link from '@mui/material/Link';
+import { Menu, MenuItem } from '@mui/material';
+
+import { useState } from 'react';
 
 
 
@@ -40,6 +44,22 @@ export default function NavMenu() {
     padding: isActive(path) ? 5 : '',
     borderRadius: isActive(path) ? 5 : '',
   });
+
+
+   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (route: string) => {
+    setAnchorEl(null);
+    navigate(route);
+  };
+
 
   return (
     <Box >
@@ -92,25 +112,52 @@ export default function NavMenu() {
 
             <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
               <Link
-                href="#/sales-page"
+                component="button"
+                id="basic-button"
+                aria-controls={open ? 'basic-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleClick}
                 underline="hover"
-                id="3"
-                style={getMenuItemStyle('/sales-page')}
+                style={{
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  fontWeight: 500,
+                  fontFamily: '"Roboto","Helvetica","Arial",sans-serif'
+                }}
               >
-                {'Special offers'}
+                <KeyboardArrowDownIcon fontSize="small" />
+                Loyalty system
               </Link>
-            </Typography>
-            
-            <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
-              <Link
-                href="#/promocodes-page"
-                underline="hover"
-                id="3"
-                style={getMenuItemStyle('/promocodes-page')}
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                slotProps={{
+                  list: {
+                    'aria-labelledby': 'basic-button',
+                  },
+                }}
               >
-                {'Promocodes'}
-              </Link>
+                <MenuItem onClick={() => handleMenuItemClick('/sales-page')}>Special offers</MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick('/promocodes-page')}>Promocodes</MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick('/cashback-page')}>Cashback</MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick('/referal-page')}>Referal system</MenuItem>
+              </Menu>
             </Typography>
+
+
+
+
+
+
             
             <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
               <Link

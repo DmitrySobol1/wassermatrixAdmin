@@ -15,6 +15,8 @@ import { Orders } from '../Pages/Orders/Orders';
 import { Clients } from '../Pages/Clients/Clients';
 import { ClientOrder } from '../Pages/Clients/ClientOrder';
 import { Promocodes } from '../Pages/Promocodes/Promocodes';
+import { CashbackBall } from '../Pages/CashbackBall/CashbackBall';
+import { ReferalSystem } from '../Pages/ReferalSystem/ReferalSystem'
 import { AddNewPromoCode } from '../Pages/Promocodes/AddNewPromoCode';
 import { AddNewPersonalPromoCode } from '../Pages/Promocodes/AddNewPersonalPromoCode';
 import { Settings } from '../Pages/Settings/Settings';
@@ -57,6 +59,10 @@ export const routes: Route[] = [
   { path: '/promocodes-page', element: <ProtectedRoute><Promocodes /></ProtectedRoute> },
   { path: '/add_new_promocode-page', element: <ProtectedRoute><AddNewPromoCode /></ProtectedRoute> },
   { path: '/add_new_personal_promocode-page', element: <ProtectedRoute><AddNewPersonalPromoCode /></ProtectedRoute> },
+
+  { path: '/cashback-page', element: <ProtectedRoute><CashbackBall /></ProtectedRoute> },
+  
+  { path: '/referal-page', element: <ProtectedRoute><ReferalSystem /></ProtectedRoute> },
 
   { path: '/settings-page', element: <ProtectedRoute><Settings /></ProtectedRoute> },
   { path: '/tags-page', element: <ProtectedRoute><Tags /></ProtectedRoute> },

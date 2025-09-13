@@ -61,6 +61,12 @@ export const Promocodes: FC = () => {
   const [editPromocodeForFirstPurchase, setEditPromocodeForFirstPurchase] = useState(false);
   const [isCheckingPromocodeUsage, setIsCheckingPromocodeUsage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Состояние для валидации промокода при редактировании
+  const [editPromocodeValidation, setEditPromocodeValidation] = useState({
+    isValid: true,
+    message: ''
+  });
 
 
 
@@ -165,9 +171,25 @@ export const Promocodes: FC = () => {
       console.log('Deactivate response:', deactivateResponse.data);
       
       if (deactivateResponse.data.status === 'ok') {
+        // Находим деактивированный промокод
+        const currentPromocodes = getCurrentPromocodes();
+        //@ts-ignore
+        const deactivatedPromocode = currentPromocodes.find(promocode => promocode._id === promocodeId);
+        
         // Удаляем деактивированный промокод из текущего массива
         //@ts-ignore
         updateCurrentPromocodes(prev => prev.filter(promocode => promocode._id !== promocodeId));
+        
+        // Добавляем деактивированный промокод в массив неактивных с указанием типа
+        if (deactivatedPromocode) {
+          const promocodeWithType = {
+            //@ts-ignore
+            ...deactivatedPromocode,
+            type: activeTab === 0 ? 'general' : 'personal'
+          };
+          //@ts-ignore
+          setArrayInactivePromocodesForRender(prev => [promocodeWithType, ...prev]);
+        }
         
         // Закрываем модальное окно
         setOpenModal(false);
@@ -204,6 +226,61 @@ export const Promocodes: FC = () => {
     }
   };
 
+  // Функция валидации промокода при редактировании
+  // const validateEditPromocode = (value: string) => {
+  //   // Проверка на пробелы (более одного слова)
+  //   if (value.includes(' ')) {
+  //     return {
+  //       isValid: false,
+  //       message: 'Promocode must be a single word without spaces'
+  //     };
+  //   }
+
+  //   // Проверка на длину
+  //   if (value.length > 15) {
+  //     return {
+  //       isValid: false,
+  //       message: 'Promocode must be no more than 15 characters'
+  //     };
+  //   }
+
+  //   return {
+  //     isValid: true,
+  //     message: ''
+  //   };
+  // };
+
+  // Обработчик ввода промокода при редактировании
+  const handleEditPromocodeInput = (value: string) => {
+    // Удаляем пробелы и преобразуем к нижнему регистру
+    let cleanValue = value.replace(/\s/g, '').toLowerCase();
+    
+    // Если есть пробелы в исходном значении, показываем предупреждение
+    if (value.includes(' ')) {
+      setEditPromocodeValidation({
+        isValid: false,
+        message: 'Promocode must be a single word without spaces'
+      });
+    }
+    // Если длина превышает 15 символов, обрезаем и показываем предупреждение
+    else if (cleanValue.length > 15) {
+      cleanValue = cleanValue.substring(0, 15);
+      setEditPromocodeValidation({
+        isValid: false,
+        message: 'Promocode must be no more than 15 characters'
+      });
+    }
+    // Если все в порядке
+    else {
+      setEditPromocodeValidation({
+        isValid: true,
+        message: ''
+      });
+    }
+
+    setEditPromocodeCode(cleanValue);
+  };
+
   // Функция для начала редактирования
   const handleStartEdit = (promocode: any) => {
     setEditingPromocodeId(promocode._id);
@@ -214,6 +291,12 @@ export const Promocodes: FC = () => {
     setEditPromocodeDescriptionRu(promocode.description_users_ru || '');
     setEditPromocodeExpiryDate(promocode.expiryDate ? new Date(promocode.expiryDate) : null);
     setEditPromocodeForFirstPurchase(promocode.forFirstPurshase || false);
+    
+    // Сбрасываем валидацию промокода
+    setEditPromocodeValidation({
+      isValid: true,
+      message: ''
+    });
   };
 
   // Функция для отмены редактирования
@@ -226,6 +309,12 @@ export const Promocodes: FC = () => {
     setEditPromocodeDescriptionRu('');
     setEditPromocodeExpiryDate(null);
     setEditPromocodeForFirstPurchase(false);
+    
+    // Сбрасываем валидацию промокода
+    setEditPromocodeValidation({
+      isValid: true,
+      message: ''
+    });
   };
 
   // Функция для сохранения изменений
@@ -235,6 +324,14 @@ export const Promocodes: FC = () => {
         !editPromocodeDescriptionDe.trim() || !editPromocodeDescriptionEn.trim() || 
         !editPromocodeDescriptionRu.trim() || !editPromocodeExpiryDate) {
       setSnackbarMessage('All fields are required');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // Проверка валидности промокода
+    if (!editPromocodeValidation.isValid) {
+      setSnackbarMessage('Please fix promocode validation errors');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
       return;
@@ -439,11 +536,13 @@ export const Promocodes: FC = () => {
                           size="small"
                           label="Promocode"
                           value={editPromocodeCode}
-                          onChange={(e) => setEditPromocodeCode(e.target.value)}
+                          onChange={(e) => handleEditPromocodeInput(e.target.value)}
                           onKeyPress={(e) => handleEditKeyPress(e, promocode._id)}
                           onBlur={handleEditBlur}
                           data-edit-input
                           autoFocus
+                          error={!editPromocodeValidation.isValid}
+                          helperText={editPromocodeValidation.message}
                         />
                         <TextField
                           size="small"
@@ -536,9 +635,15 @@ export const Promocodes: FC = () => {
                       </Box>
 
                       {activeTab === 1  &&    
-                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                         client telegram id: {promocode.tlgid.tlgid}
-                        </Typography>
+                        <> 
+                          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          promocode generated by: {promocode.generatedBy}
+                          </Typography>
+
+                          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          client telegram id: {promocode.tlgid.tlgid}
+                          </Typography>
+                        </>
                       }
 
                       
@@ -620,7 +725,7 @@ export const Promocodes: FC = () => {
                           <IconButton
                             aria-label="show-client"
                             color="info"
-                            onClick={() => handleShowClient(activeTab === 1 ? promocode.tlgid.tlgid : promocode.tlgid)}
+                            onClick={() => handleShowClient(activeTab === 1 ? promocode.tlgid.tlgid : promocode.tlgid.tlgid)}
                           >
                             <PersonIcon />
                           </IconButton>

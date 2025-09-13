@@ -225,6 +225,7 @@ export const Orders: FC = () => {
 
     //@ts-ignore
     setOrdersForRender(filteredOrders);
+    
   };
 
   // Обработчик изменения статуса заказа
@@ -620,8 +621,13 @@ export const Orders: FC = () => {
                                       display: 'block',
                                     }}
                                   >
-                                    {item.qty} pcs x {item.price_eu} € ={' '}
-                                    {item.qty * item.price_eu} €
+                                    {/* {item.qty} pcs x {item.price_eu} € ={' '}
+                                    {item.qty * item.price_eu} € */}
+                                    {item.qty} pcs x {item.actualPurchasePriceInEu} € ={' '}
+                                    {item.qty * item.actualPurchasePriceInEu} €
+                                    {item.isPurchasedBySale && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by sale</span>}
+                                    {item.isPurchasedByPromocode && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by promocode</span>}
+                                    {item.isPurchasedByCashback && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>written-off cashback</span>}
                                   </Typography>
                                   <Typography
                                     component="span"

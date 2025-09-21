@@ -109,6 +109,16 @@ export default function NavMenu() {
               </Link>
             </Typography>
             
+            <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
+              <Link
+                href="#/crm-page"
+                underline="hover"
+                style={getMenuItemStyle('/crm-page')}
+              >
+                {'CRM'}
+              </Link>
+            </Typography>
+            
 
             <Typography variant="h6" component="div" sx={{ flexGrow: 0 }}>
               <Link

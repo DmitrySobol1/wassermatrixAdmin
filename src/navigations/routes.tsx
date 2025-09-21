@@ -13,6 +13,7 @@ import { Carts } from '../Pages/Carts/Carts';
 import { CountriesForDelivery } from '../Pages/CountriesForDelivery/CountriesForDelivery';
 import { Orders } from '../Pages/Orders/Orders';
 import { Clients } from '../Pages/Clients/Clients';
+import { Crm } from '../Pages/Clients/Crm';
 import { ClientOrder } from '../Pages/Clients/ClientOrder';
 import { Promocodes } from '../Pages/Promocodes/Promocodes';
 import { CashbackBall } from '../Pages/CashbackBall/CashbackBall';
@@ -51,6 +52,7 @@ export const routes: Route[] = [
 
   { path: '/clients-page', element: <ProtectedRoute><Clients /></ProtectedRoute> },
   { path: '/clientorder-page', element: <ProtectedRoute><ClientOrder /></ProtectedRoute> },
+  { path: '/crm-page', element: <ProtectedRoute><Crm /></ProtectedRoute> },
 
   { path: '/carts-page', element: <ProtectedRoute><Carts /></ProtectedRoute> },
   

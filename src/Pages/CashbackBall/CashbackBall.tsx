@@ -328,7 +328,7 @@ export const CashbackBall: FC = () => {
                         {cashback.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Total amount of purchase: {cashback.sum} € | Percent: {cashback.percent}%
+                        Total amount of purchase ≥ {cashback.sum} € | Percent: {cashback.percent}%
                       </Typography>
                     </>
                   )}

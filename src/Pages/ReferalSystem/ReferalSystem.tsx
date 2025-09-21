@@ -487,6 +487,9 @@ export const ReferalSystem : FC = () => {
           <Typography variant="body1" >
         2) for purchase of invited referals - we present cashback points to referers
         </Typography>
+        <Typography variant="body1" >
+          !!! Please note: the referral cashback points is calculated as a percentage of the cost of ONLY THE GOODS purchased by his referral,  not the cost of the GOODS + DELIVERY.
+        </Typography>
         </Box>
 
         <Box sx={sectionBox}>

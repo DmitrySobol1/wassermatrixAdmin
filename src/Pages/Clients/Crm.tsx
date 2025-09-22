@@ -49,6 +49,7 @@ export const Crm: FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<HTMLElement | null>(null);
+  const [infoMenuAnchor, setInfoMenuAnchor] = useState<HTMLElement | null>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [promoMenuAnchor, setPromoMenuAnchor] = useState<HTMLElement | null>(null);
   const [personalPromocodes, setPersonalPromocodes] = useState<any[]>([]);
@@ -274,8 +275,16 @@ export const Crm: FC = () => {
 
   // Обработчики для действий администратора
   const handleChipClick = (event: React.MouseEvent<HTMLElement>, user: any) => {
-    setActionMenuAnchor(event.currentTarget);
     setSelectedUser(user);
+
+    // Проверяем crmStatus пользователя
+    if (user.crmStatus === 2) {
+      // Показываем обычное меню действий для crmStatus == 2
+      setActionMenuAnchor(event.currentTarget);
+    } else if (user.crmStatus === 3) {
+      // Показываем информационное меню для crmStatus == 3
+      setInfoMenuAnchor(event.currentTarget);
+    }
   };
 
   const handleActionMenuClose = () => {
@@ -283,6 +292,47 @@ export const Crm: FC = () => {
     setPromoMenuAnchor(null);
     setSelectedUser(null);
     setPersonalPromocodes([]);
+  };
+
+  const handleInfoMenuClose = () => {
+    setInfoMenuAnchor(null);
+    setSelectedUser(null);
+  };
+
+  const handleAlreadySentClick = async () => {
+    if (!selectedUser) return;
+
+    try {
+      // Обновляем в БД isWaitingAdminAction на false
+      const response = await axios.post('/admin_update_waiting_status', {
+        userId: selectedUser.id,
+        isWaitingAdminAction: false
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем текст в chip
+        setAdminDoAction('ok');
+        setChipColor('success')
+
+        // Обновляем локальное состояние пользователя
+        setArrayUsersForRender((prev: any) =>
+          prev.map((user: any) =>
+            user.id === selectedUser.id
+              ? { ...user, isWaitingAdminAction: false }
+              : user
+          )
+        );
+
+        // Показываем уведомление об успехе
+        setSnackbarMessage('Status updated successfully');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error updating admin action status:', error);
+      alert('Error updating status');
+    }
+
+    handleInfoMenuClose();
   };
 
   const handlePromoMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -321,20 +371,20 @@ export const Crm: FC = () => {
     handleActionMenuClose();
   };
 
-  const handleAction2 = async () => {
-    if (selectedUser) {
-      console.log('Action 2 для пользователя:', selectedUser.name);
-      // Здесь можно добавить API вызов для выполнения действия 2
-      try {
-        // Пример API вызова:
-        // await axios.post('/admin_action2', { userId: selectedUser.id });
-        alert(`Action 2 выполнен для пользователя ${selectedUser.name}`);
-      } catch (error) {
-        console.error('Ошибка выполнения Action 2:', error);
-      }
-    }
-    handleActionMenuClose();
-  };
+  // const handleAction2 = async () => {
+  //   if (selectedUser) {
+  //     console.log('Action 2 для пользователя:', selectedUser.name);
+  //     // Здесь можно добавить API вызов для выполнения действия 2
+  //     try {
+  //       // Пример API вызова:
+  //       // await axios.post('/admin_action2', { userId: selectedUser.id });
+  //       alert(`Action 2 выполнен для пользователя ${selectedUser.name}`);
+  //     } catch (error) {
+  //       console.error('Ошибка выполнения Action 2:', error);
+  //     }
+  //   }
+  //   handleActionMenuClose();
+  // };
 
   // Группировка пользователей по этапам
   const getUsersByStage = (stageId: Number) => {
@@ -612,11 +662,19 @@ export const Crm: FC = () => {
         >
           <MenuItem
             onMouseEnter={handlePromoMenuOpen}
-            sx={{ pr: 4 }}
+            // sx={{
+            //   pr: 4,
+            //   '&:hover': {
+            //     backgroundColor: 'orange'
+            //   },
+            //   '&:focus': {
+            //     backgroundColor: 'orange'
+            //   }
+            // }}
           >
             Give personal promo {'>'}
           </MenuItem>
-          <MenuItem onClick={handleAction2}>Action 2</MenuItem>
+          {/* <MenuItem onClick={handleAction2}>Action 2</MenuItem> */}
         </Menu>
 
         {/* Вложенное меню для промокодов */}
@@ -644,8 +702,16 @@ export const Crm: FC = () => {
               <CircularProgress size={24} />
             </Box>
           ) : personalPromocodes.length === 0 ? (
-            <MenuItem disabled sx={{ fontStyle: 'italic' }}>
-              Create promocodes firstly
+            <MenuItem
+            // onClick={() => navigate('/add_new_personal_promocode-page')}
+              onClick={(e) => {
+                e.preventDefault();
+                handlePromoMenuClose();
+                navigate(`/add_new_personal_promocode-page?tlgid=${selectedUser?.tlgid}`);
+              }}
+              sx={{ fontStyle: 'italic', cursor: 'pointer' }}
+            >
+              no promocodes (press to create new)
             </MenuItem>
           ) : (
             personalPromocodes.map((promo: any) => (
@@ -666,6 +732,28 @@ export const Crm: FC = () => {
               </MenuItem>
             ))
           )}
+        </Menu>
+
+        {/* Меню для crmStatus == 3 */}
+        <Menu
+          anchorEl={infoMenuAnchor}
+          open={Boolean(infoMenuAnchor)}
+          onClose={handleInfoMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <MenuItem
+            onClick={handleAlreadySentClick}
+            sx={{ fontStyle: 'italic', cursor: 'pointer' }}
+          >
+            ✅ admin already sent message to user
+          </MenuItem>
         </Menu>
 
         <Snackbar

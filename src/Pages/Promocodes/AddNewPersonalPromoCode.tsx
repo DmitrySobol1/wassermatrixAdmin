@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from '../../axios';
 
 import NavMenu from '../../components/NavMenu/NavMenu';
@@ -26,6 +26,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 export const AddNewPersonalPromoCode: FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [promocodeData, setPromocodeData] = useState({
     description_admin: '',
@@ -119,13 +120,21 @@ export const AddNewPersonalPromoCode: FC = () => {
   useEffect(() => {
     setIsLoading(false);
 
+    // Получаем tlgid из URL параметров и автозаполняем поле
+    const tlgidFromUrl = searchParams.get('tlgid');
+    if (tlgidFromUrl) {
+      setPromocodeData(prev => ({ ...prev, tlgid: tlgidFromUrl }));
+      // Валидируем пользователя сразу
+      validateUser(tlgidFromUrl);
+    }
+
     // Cleanup debounce таймера при размонтировании компонента
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, []);
+  }, [searchParams]);
 
   //@ts-ignore
   const handlePromocodeInput = (e) => {

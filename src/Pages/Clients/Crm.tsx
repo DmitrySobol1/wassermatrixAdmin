@@ -752,7 +752,7 @@ export const Crm: FC = () => {
             onClick={handleAlreadySentClick}
             sx={{ fontStyle: 'italic', cursor: 'pointer' }}
           >
-             admin already sent message to user
+             click, to set that admin already sent message to user
           </MenuItem>
         </Menu>
 

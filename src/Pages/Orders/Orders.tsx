@@ -1,7 +1,8 @@
 import type { FC } from 'react';
 import axios from '../../axios';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import NavMenu from '../../components/NavMenu/NavMenu';
 
@@ -17,6 +18,8 @@ import FormControl from '@mui/material/FormControl';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import ClearIcon from '@mui/icons-material/Clear';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import Accordion from '@mui/material/Accordion';
@@ -35,8 +38,10 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 
 export const Orders: FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // const [orders,setOrders] = useState([]);
-  const [allOrders, setAllOrders] = useState([]); // Все заказы для фильтрации
+  const [originalOrders, setOriginalOrders] = useState([]); // Оригинальный список заказов для поиска
   const [ordersForRender, setOrdersForRender] = useState([]); // Отображаемые заказы
   const [orderStatuses, setOrderStatuses] = useState([]);
   const [statusFilters, setStatusFilters] = useState([]); // Фильтры для Chip
@@ -44,8 +49,18 @@ export const Orders: FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [isUserSearching, setIsUserSearching] = useState(false);
   const domen = import.meta.env.VITE_DOMEN;
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
+
+  // Ref для debounce таймера
+  //@ts-ignore
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  //@ts-ignore
+  const userDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Функция отправки сообщения клиенту о доставке
   const sendMessageToClient = async (order: any) => {
@@ -79,9 +94,9 @@ export const Orders: FC = () => {
               : o
           );
 
-        // @ts-ignore 
-        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
-        // @ts-ignore 
+        // @ts-ignore
+        setOriginalOrders((prevOrders) => updateOrderInArray(prevOrders));
+        // @ts-ignore
         setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
 
         // Показываем уведомление об успешной отправке
@@ -95,6 +110,22 @@ export const Orders: FC = () => {
     }
   };
 
+  // Инициализация searchTerm и userSearchTerm из URL параметров
+  useEffect(() => {
+    const orderIdFromUrl = searchParams.get('orderId');
+    if (orderIdFromUrl) {
+      setSearchTerm(orderIdFromUrl);
+    }
+    const userIdFromUrl = searchParams.get('userId');
+    if (userIdFromUrl) {
+      setUserSearchTerm(userIdFromUrl);
+    }
+    const filterFromUrl = searchParams.get('filter');
+    if (filterFromUrl) {
+      setSelectedFilterId(filterFromUrl);
+    }
+  }, [searchParams]);
+
   // получить список заказов и статусов
   useEffect(() => {
     const fetchData = async () => {
@@ -107,7 +138,7 @@ export const Orders: FC = () => {
         //@ts-ignore
         // setOrders(ordersData);
         //@ts-ignore
-        setAllOrders(ordersData);
+        setOriginalOrders(ordersData); // Сохраняем оригинальный список для поиска
         //@ts-ignore
         setOrdersForRender(ordersData);
 
@@ -143,6 +174,164 @@ export const Orders: FC = () => {
     };
 
     fetchData();
+  }, []);
+
+  // Выполняем поиск при изменении searchTerm или userSearchTerm (включая инициализацию из URL)
+  useEffect(() => {
+    if (originalOrders.length > 0) {
+      searchOrders(searchTerm, userSearchTerm);
+    }
+  }, [searchTerm, userSearchTerm, originalOrders]);
+
+  // Применяем фильтр из URL после загрузки данных
+  useEffect(() => {
+    if (originalOrders.length > 0 && selectedFilterId !== 'all') {
+      statusPressedHandler(selectedFilterId);
+    }
+  }, [originalOrders, selectedFilterId]);
+
+  // Функция поиска заказов по ID и telegram ID
+  const searchOrders = (orderSearchValue: string, userSearchValue: string) => {
+    setIsSearching(true);
+    setIsUserSearching(true);
+
+    // Если оба поиска пустые, показываем все заказы
+    if (!orderSearchValue.trim() && !userSearchValue.trim()) {
+      //@ts-ignore
+      setOrdersForRender(originalOrders);
+      setIsSearching(false);
+      setIsUserSearching(false);
+      // Применяем текущий фильтр если он активен
+      if (selectedFilterId !== 'all') {
+        statusPressedHandler(selectedFilterId);
+      }
+      return;
+    }
+
+    // Фильтруем заказы
+    //@ts-ignore
+    const filteredOrders = originalOrders.filter(order => {
+      let matchesOrderId = true;
+      let matchesUserId = true;
+
+      // Проверка по order ID
+      if (orderSearchValue.trim()) {
+        //@ts-ignore
+        matchesOrderId = order._id.toString().includes(orderSearchValue.trim());
+      }
+
+      // Проверка по telegram ID
+      if (userSearchValue.trim()) {
+        //@ts-ignore
+        matchesUserId = order.tlgid.toString().includes(userSearchValue.trim());
+      }
+
+      return matchesOrderId && matchesUserId;
+    });
+
+    //@ts-ignore
+    setOrdersForRender(filteredOrders);
+    setIsSearching(false);
+    setIsUserSearching(false);
+  };
+
+  // Функция для обновления URL параметров
+  const updateUrlParams = (orderIdValue: string, userIdValue?: string) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+
+    if (orderIdValue.trim()) {
+      newSearchParams.set('orderId', orderIdValue.trim());
+    } else {
+      newSearchParams.delete('orderId');
+    }
+
+    if (userIdValue !== undefined) {
+      if (userIdValue.trim()) {
+        newSearchParams.set('userId', userIdValue.trim());
+      } else {
+        newSearchParams.delete('userId');
+      }
+    }
+
+    setSearchParams(newSearchParams);
+  };
+
+  // Обработчик изменения поля поиска с debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Очищаем предыдущий таймер
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Устанавливаем новый таймер с задержкой 1 секунда
+    debounceTimer.current = setTimeout(() => {
+      updateUrlParams(value);
+    }, 1000);
+  };
+
+  // Обработчик изменения поля поиска по telegram ID с debounce
+  const handleUserSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUserSearchTerm(value);
+
+    // Очищаем предыдущий таймер
+    if (userDebounceTimer.current) {
+      clearTimeout(userDebounceTimer.current);
+    }
+
+    // Устанавливаем новый таймер с задержкой 1 секунда
+    userDebounceTimer.current = setTimeout(() => {
+      updateUrlParams(searchTerm, value);
+    }, 1000);
+  };
+
+  // Обработчик нажатия Enter для order ID
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Очищаем таймер и обновляем URL немедленно
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+      updateUrlParams(searchTerm);
+    }
+  };
+
+  // Обработчик нажатия Enter для user ID
+  const handleUserSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Очищаем таймер и обновляем URL немедленно
+      if (userDebounceTimer.current) {
+        clearTimeout(userDebounceTimer.current);
+      }
+      updateUrlParams(searchTerm, userSearchTerm);
+    }
+  };
+
+  // Функция очистки поля поиска order ID
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    updateUrlParams('', userSearchTerm);
+  };
+
+  // Функция очистки поля поиска user ID
+  const handleClearUserSearch = () => {
+    setUserSearchTerm('');
+    updateUrlParams(searchTerm, '');
+  };
+
+  // Cleanup таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+      if (userDebounceTimer.current) {
+        clearTimeout(userDebounceTimer.current);
+      }
+    };
   }, []);
 
   const wrapperBox = {
@@ -190,16 +379,41 @@ export const Orders: FC = () => {
     setSelectedFilterId(filterId);
     console.log('filterId=', filterId);
 
+    // Определяем базовый массив для фильтрации (учитываем поиск)
+    //@ts-ignore
+    let baseOrders = originalOrders;
+
+    // Применяем фильтры поиска
+    if (searchTerm.trim() || userSearchTerm.trim()) {
+      //@ts-ignore
+      baseOrders = originalOrders.filter(order => {
+        let matchesOrderId = true;
+        let matchesUserId = true;
+
+        if (searchTerm.trim()) {
+          //@ts-ignore
+          matchesOrderId = order._id.toString().includes(searchTerm.trim());
+        }
+
+        if (userSearchTerm.trim()) {
+          //@ts-ignore
+          matchesUserId = order.tlgid.toString().includes(userSearchTerm.trim());
+        }
+
+        return matchesOrderId && matchesUserId;
+      });
+    }
+
     if (filterId === 'all') {
       //@ts-ignore
-      setOrdersForRender(allOrders);
+      setOrdersForRender(baseOrders);
       return;
     }
 
     // Фильтрация по статусу оплаты
     if (filterId === 'paid') {
       //@ts-ignore
-      const filteredOrders = allOrders.filter(
+      const filteredOrders = baseOrders.filter(
         (order: any) => order.payStatus === true
       );
       //@ts-ignore
@@ -209,7 +423,7 @@ export const Orders: FC = () => {
 
     if (filterId === 'not_paid') {
       //@ts-ignore
-      const filteredOrders = allOrders.filter(
+      const filteredOrders = baseOrders.filter(
         (order: any) => order.payStatus === false
       );
       //@ts-ignore
@@ -219,13 +433,13 @@ export const Orders: FC = () => {
 
     // Фильтруем заказы по выбранному статусу заказа
     //@ts-ignore
-    const filteredOrders = allOrders.filter(
+    const filteredOrders = baseOrders.filter(
       (order: any) => order.orderStatus?._id === filterId
     );
 
     //@ts-ignore
     setOrdersForRender(filteredOrders);
-    
+
   };
 
   // Обработчик изменения статуса заказа
@@ -248,7 +462,7 @@ export const Orders: FC = () => {
         //@ts-ignore
         // setOrders(prevOrders => updateOrderInArray(prevOrders));
         //@ts-ignore
-        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
+        setOriginalOrders((prevOrders) => updateOrderInArray(prevOrders));
         //@ts-ignore
         setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
 
@@ -293,7 +507,7 @@ export const Orders: FC = () => {
           );
 
         //@ts-ignore
-        setAllOrders((prevOrders) => updateOrderInArray(prevOrders));
+        setOriginalOrders((prevOrders) => updateOrderInArray(prevOrders));
         //@ts-ignore
         setOrdersForRender((prevOrders) => updateOrderInArray(prevOrders));
 
@@ -340,6 +554,62 @@ export const Orders: FC = () => {
           </Typography>
         </Box>
 
+        <Box sx={sectionBox}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <TextField
+              label="🔍 Search by Order ID"
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchKeyPress}
+              placeholder="🔍 order id..."
+              disabled={isSearching}
+              sx={{ maxWidth: 350 }}
+              helperText={isSearching ? "Searching..." : ''}
+              InputProps={{
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear search"
+                      onClick={handleClearSearch}
+                      edge="end"
+                      size="small"
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label="🔍 Search by Telegram ID"
+              variant="outlined"
+              value={userSearchTerm}
+              onChange={handleUserSearchChange}
+              onKeyPress={handleUserSearchKeyPress}
+              placeholder="🔍 telegram id..."
+              disabled={isUserSearching}
+              sx={{ maxWidth: 350 }}
+              helperText={isUserSearching ? "Searching..." : ''}
+              InputProps={{
+                endAdornment: userSearchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear user search"
+                      onClick={handleClearUserSearch}
+                      edge="end"
+                      size="small"
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+        </Box>
+
         {/* Фильтры */}
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={1}>
@@ -377,6 +647,14 @@ export const Orders: FC = () => {
         </Box>
 
         <Box sx={sectionBox}>
+          {(searchTerm || userSearchTerm) && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {ordersForRender.length} order{ordersForRender.length !== 1 ? 's' : ''} found
+              {searchTerm && ` for order ID "${searchTerm}"`}
+              {userSearchTerm && ` for telegram ID "${userSearchTerm}"`}
+            </Typography>
+          )}
+
           {ordersForRender.map((order: any) => (
             <Stack
               key={order._id}
@@ -463,6 +741,7 @@ export const Orders: FC = () => {
                               : 'set estimate date of delivery:'}
                           </span>
                           <TextField
+                          disabled = {order.messageToClientAboutDelivery? true : false}
                             type="date"
                             value={order.eta || ''}
                             onChange={(e) =>

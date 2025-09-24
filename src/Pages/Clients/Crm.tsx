@@ -34,8 +34,9 @@ const CRM_STAGES = [
   { id: 1, name: 'Вошел в апп', color: '#f3e5f5' },
   { id: 2, name: 'Положил в корзину, но не перешел к оплате', color: '#fff3e0' },
   { id: 3, name: 'Перешел к оплате, но прервал оплату', color: '#fff8e1' },
-  { id: 4, name: 'Оплатил 1ый раз', color: '#f1f8e9' },
-  { id: 5, name: 'Оплатил >1 раза', color: '#e8f5e8' },
+  { id: 4, name: 'Оплатил', color: '#f1f8e9' },
+  { id: 5, name: 'Идет доставка', color: '#e8f5e8' },
+  { id: 6, name: 'Доставлено + период рассылки', color: '#e8f5e8' },
 ];
 
 export const Crm: FC = () => {
@@ -52,6 +53,7 @@ export const Crm: FC = () => {
   const [infoMenuAnchor, setInfoMenuAnchor] = useState<HTMLElement | null>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [promoMenuAnchor, setPromoMenuAnchor] = useState<HTMLElement | null>(null);
+  const [deliveryMenuAnchor, setDeliveryMenuAnchor] = useState<HTMLElement | null>(null);
   const [personalPromocodes, setPersonalPromocodes] = useState<any[]>([]);
   const [isLoadingPromocodes, setIsLoadingPromocodes] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -117,7 +119,7 @@ export const Crm: FC = () => {
             ordersCount: userOrdersCount,
             tags: item.tags || [],
             crmStatus: crmStatus,
-            isWaitisWaitingAdminAction: item.isWaitingAdminAction || false 
+            isWaitingAdminAction: item.isWaitingAdminAction || false 
           };
         });
 
@@ -284,6 +286,9 @@ export const Crm: FC = () => {
     } else if (user.crmStatus === 3) {
       // Показываем информационное меню для crmStatus == 3
       setInfoMenuAnchor(event.currentTarget);
+    } else if (user.crmStatus === 4) {
+      // Показываем меню для установки даты доставки при crmStatus == 4
+      setDeliveryMenuAnchor(event.currentTarget);
     }
   };
 
@@ -297,6 +302,19 @@ export const Crm: FC = () => {
   const handleInfoMenuClose = () => {
     setInfoMenuAnchor(null);
     setSelectedUser(null);
+  };
+
+  const handleDeliveryMenuClose = () => {
+    setDeliveryMenuAnchor(null);
+    setSelectedUser(null);
+  };
+
+  const handleSetDeliveryDate = () => {
+    if (selectedUser) {
+      // Переходим на страницу Orders с передачей userId и фильтром paid
+      navigate(`/orders-page?userId=${selectedUser.tlgid}&filter=paid`);
+    }
+    handleDeliveryMenuClose();
   };
 
   const handleAlreadySentClick = async () => {
@@ -444,7 +462,7 @@ export const Crm: FC = () => {
         <Box sx={sectionBox}>
           
           <Typography variant="h4" component="h4">
-            CRM
+            CRM of clients
           </Typography>
         
         </Box>
@@ -542,11 +560,28 @@ export const Crm: FC = () => {
                                 {user.name} 
                               </Typography>
 
-                              {user.isWaitisWaitingAdminAction &&
+                              {(user.isWaitingAdminAction && (user.crmStatus === 2 || user.crmStatus === 3)) &&
                                 <Chip
                                   label={adminDoAction}
                                   size="medium"
                                   color={chipColor}
+                                  sx={{
+                                    fontSize: '0.65rem',
+                                    height: '18px',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      backgroundColor: 'warning.dark'
+                                    }
+                                  }}
+                                  onClick={(event) => handleChipClick(event, user)}
+                                />
+                              }
+
+                              {(user.crmStatus === 4 && user.isWaitingAdminAction) &&
+                                <Chip
+                                  label="admin do action"
+                                  size="medium"
+                                  color="warning"
                                   sx={{
                                     fontSize: '0.65rem',
                                     height: '18px',
@@ -752,7 +787,29 @@ export const Crm: FC = () => {
             onClick={handleAlreadySentClick}
             sx={{ fontStyle: 'italic', cursor: 'pointer' }}
           >
-             click, to set that admin already sent message to user
+             click, to set that admin already sent message to user 
+          </MenuItem>
+        </Menu>
+
+        {/* Меню для crmStatus == 4 */}
+        <Menu
+          anchorEl={deliveryMenuAnchor}
+          open={Boolean(deliveryMenuAnchor)}
+          onClose={handleDeliveryMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <MenuItem
+            onClick={handleSetDeliveryDate}
+            sx={{ fontStyle: 'italic', cursor: 'pointer' }}
+          >
+            set delivery date
           </MenuItem>
         </Menu>
 

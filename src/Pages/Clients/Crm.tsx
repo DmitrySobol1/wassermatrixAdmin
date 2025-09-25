@@ -54,8 +54,12 @@ export const Crm: FC = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [promoMenuAnchor, setPromoMenuAnchor] = useState<HTMLElement | null>(null);
   const [deliveryMenuAnchor, setDeliveryMenuAnchor] = useState<HTMLElement | null>(null);
+  const [stageMenuAnchor, setStageMenuAnchor] = useState<HTMLElement | null>(null);
+  const [ordersMenuAnchor, setOrdersMenuAnchor] = useState<HTMLElement | null>(null);
   const [personalPromocodes, setPersonalPromocodes] = useState<any[]>([]);
   const [isLoadingPromocodes, setIsLoadingPromocodes] = useState(false);
+  const [userOrders, setUserOrders] = useState<any[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [adminDoAction, setAdminDoAction] = useState('admin do action')
@@ -247,6 +251,33 @@ export const Crm: FC = () => {
     fetchPersonalPromocodes();
   }, [promoMenuAnchor, selectedUser]);
 
+  // Загрузка заказов пользователя при открытии подменю
+  useEffect(() => {
+    const fetchUserOrders = async () => {
+      if (ordersMenuAnchor && selectedUser) {
+        setIsLoadingOrders(true);
+        try {
+          const response = await axios.get(`/admin_get_user_orders/${selectedUser.tlgid}`);
+          console.log('User orders response:', response.data);
+
+          // Фильтруем заказы по критериям: orderStatus = '689b8ace384ddd696a12e0ec' && payStatus = true
+          const filteredOrders = response.data.orders?.filter((order: any) =>
+            order.orderStatus?._id === '689b8ace384ddd696a12e0ec' && order.payStatus === true
+          ) || [];
+
+          setUserOrders(filteredOrders);
+        } catch (error) {
+          console.error('Error fetching user orders:', error);
+          setUserOrders([]);
+        } finally {
+          setIsLoadingOrders(false);
+        }
+      }
+    };
+
+    fetchUserOrders();
+  }, [ordersMenuAnchor, selectedUser]);
+
   // Функция для обновления тегов пользователя
   // const handleUserTagsChange = async (userId: string, selectedTagIds: string[]) => {
   //   try {
@@ -289,6 +320,9 @@ export const Crm: FC = () => {
     } else if (user.crmStatus === 4) {
       // Показываем меню для установки даты доставки при crmStatus == 4
       setDeliveryMenuAnchor(event.currentTarget);
+    } else if (user.crmStatus === 5) {
+      // Показываем меню для перехода на следующий этап для crmStatus == 5
+      setStageMenuAnchor(event.currentTarget);
     }
   };
 
@@ -315,6 +349,64 @@ export const Crm: FC = () => {
       navigate(`/orders-page?userId=${selectedUser.tlgid}&filter=paid`);
     }
     handleDeliveryMenuClose();
+  };
+
+  const handleStageMenuClose = () => {
+    setStageMenuAnchor(null);
+    setSelectedUser(null);
+  };
+
+  const handleOrdersMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setOrdersMenuAnchor(event.currentTarget);
+  };
+
+  const handleOrdersMenuClose = () => {
+    setOrdersMenuAnchor(null);
+    setUserOrders([]);
+  };
+
+  const handleMoveToNextStage = async (order:any) => {
+    if (!selectedUser) return;
+
+
+    try {
+      // Отправляем запрос на бекенд для изменения crmStatus на 6 и isWaitingAdminAction на false
+      const response = await axios.post('/admin_move_user_to_next_stage', {
+        userId: selectedUser.id,
+        newCrmStatus: 6,
+        isWaitingAdminAction: false,
+        order
+      });
+
+      if (response.data.status === 'ok') {
+        // Обновляем локальное состояние пользователя
+        setArrayUsersForRender((prev: any) =>
+          prev.map((user: any) =>
+            user.id === selectedUser.id
+              ? { ...user, crmStatus: 6, isWaitingAdminAction: false }
+              : user
+          )
+        );
+
+        setOriginalUsers((prev: any) =>
+          prev.map((user: any) =>
+            user.id === selectedUser.id
+              ? { ...user, crmStatus: 6, isWaitingAdminAction: false }
+              : user
+          )
+        );
+
+        // Показываем зеленый snackbar с уведомлением об успехе
+        setSnackbarMessage('user moved to next stage');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error moving user to next stage:', error);
+      setSnackbarMessage('Error updating user stage');
+      setSnackbarOpen(true);
+    }
+
+    handleStageMenuClose();
   };
 
   const handleAlreadySentClick = async () => {
@@ -560,7 +652,7 @@ export const Crm: FC = () => {
                                 {user.name} 
                               </Typography>
 
-                              {(user.isWaitingAdminAction && (user.crmStatus === 2 || user.crmStatus === 3)) &&
+                              {(user.isWaitingAdminAction && (user.crmStatus === 2 || user.crmStatus === 3 || user.crmStatus === 5)) &&
                                 <Chip
                                   label={adminDoAction}
                                   size="medium"
@@ -593,6 +685,7 @@ export const Crm: FC = () => {
                                   onClick={(event) => handleChipClick(event, user)}
                                 />
                               }
+
 
                               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0 }}>
                                 telegram id: {user.tlgid}
@@ -811,6 +904,85 @@ export const Crm: FC = () => {
           >
             set delivery date
           </MenuItem>
+        </Menu>
+
+        {/* Меню для crmStatus == 5 */}
+        <Menu
+          anchorEl={stageMenuAnchor}
+          open={Boolean(stageMenuAnchor)}
+          onClose={handleStageMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <MenuItem
+            onMouseEnter={handleOrdersMenuOpen}
+            sx={{
+              fontStyle: 'italic',
+              cursor: 'pointer',
+              pr: 4,
+              '&:hover': {
+                backgroundColor: 'action.hover'
+              }
+            }}
+          >
+            ✅ set delivered order {'>'}
+          </MenuItem>
+        </Menu>
+
+        {/* Подменю с заказами для crmStatus == 5 */}
+        <Menu
+          anchorEl={ordersMenuAnchor}
+          open={Boolean(ordersMenuAnchor)}
+          onClose={handleOrdersMenuClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          sx={{
+            ml: 1,
+            '& .MuiPaper-root': {
+              minWidth: '250px',
+              maxHeight: '400px'
+            }
+          }}
+        >
+          {isLoadingOrders ? (
+            <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : userOrders.length === 0 ? (
+            <MenuItem disabled sx={{ fontStyle: 'italic' }}>
+              Нет подходящих заказов
+            </MenuItem>
+          ) : (
+            userOrders.map((order: any) => (
+              <MenuItem
+                key={order._id}
+                onClick={() => handleMoveToNextStage(order._id)}
+                // onClick={() => console.log('ORDER IDDDD=', order._id)}
+                sx={{ cursor: 'pointer' }}
+              >
+                <Box>
+                  <Typography variant="body2">
+                    order: {order._id}
+                  </Typography>
+                  {/* <Typography variant="caption" color="text.secondary">
+                    {order.formattedDate} | {order.totalAmount?.toFixed(2)}€
+                  </Typography> */}
+                </Box>
+              </MenuItem>
+            ))
+          )}
         </Menu>
 
         <Snackbar

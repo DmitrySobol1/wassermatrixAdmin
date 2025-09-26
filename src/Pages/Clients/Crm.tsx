@@ -30,13 +30,13 @@ import MenuItem from '@mui/material/MenuItem';
 
 
 const CRM_STAGES = [
-  { id: 0, name: 'Периодические рассылки', color: '#e3f2fd' },
+  { id: 0, name: 'Периодические рассылки кто не купил', color: '#e3f2fd' },
   { id: 1, name: 'Вошел в апп', color: '#f3e5f5' },
   { id: 2, name: 'Положил в корзину, но не перешел к оплате', color: '#fff3e0' },
   { id: 3, name: 'Перешел к оплате, но прервал оплату', color: '#fff8e1' },
   { id: 4, name: 'Оплатил', color: '#f1f8e9' },
   { id: 5, name: 'Идет доставка', color: '#e8f5e8' },
-  { id: 6, name: 'Доставлено + период рассылки', color: '#e8f5e8' },
+  { id: 6, name: 'Доставлено + период рассылки кто купил', color: '#e8f5e8' },
 ];
 
 export const Crm: FC = () => {
@@ -64,7 +64,8 @@ export const Crm: FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [adminDoAction, setAdminDoAction] = useState('admin do action')
   const [chipColor, setChipColor] = useState<'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'>('warning')
-  
+  const [quantityAtBot, setQuantityAtBot] = useState(0)
+
   const jb_chat_url = import.meta.env.VITE_JB_CHAR_URL;
 
   // Ref для debounce таймера 
@@ -99,6 +100,14 @@ export const Crm: FC = () => {
         const ordersData = orders.data.orders;
         //@ts-ignore
         // setAllOrders(ordersData);
+
+        // const responseQtyAtBot = 
+        const responseQtyAtBot = await axios.get('/get_qty_atbot');
+        if (responseQtyAtBot.data.status == 'ok'){
+          console.log ('QTYYYYYYYYYYY=', responseQtyAtBot.data )
+          setQuantityAtBot(responseQtyAtBot.data.qty)
+        }
+
 
         // Подсчитываем количество заказов для каждого пользователя
         //@ts-ignore
@@ -591,9 +600,11 @@ export const Crm: FC = () => {
         {/* CRM Pipeline */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Всего клиентов: {arrayUsersForRender.length}
+           total quantity at bot: {quantityAtBot}    |   total quantity at app: {arrayUsersForRender.length}
             {searchTerm && ` | Поиск: "${searchTerm}"`}
+            
           </Typography>
+          
 
           <Box sx={{ display: 'flex', gap: 2, minHeight: '600px', overflowX: 'auto' }}>
             {CRM_STAGES.map((stage) => {
@@ -962,7 +973,7 @@ export const Crm: FC = () => {
             </Box>
           ) : userOrders.length === 0 ? (
             <MenuItem disabled sx={{ fontStyle: 'italic' }}>
-              Нет подходящих заказов
+              No orders
             </MenuItem>
           ) : (
             userOrders.map((order: any) => (

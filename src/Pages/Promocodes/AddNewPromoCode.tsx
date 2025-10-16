@@ -23,6 +23,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 export const AddNewPromoCode: FC = () => {
   const navigate = useNavigate();
@@ -41,12 +43,17 @@ export const AddNewPromoCode: FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Состояние для валидации промокода
   const [promocodeValidation, setPromocodeValidation] = useState({
     isValid: true,
     message: ''
   });
+
+  // Состояние для Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'error' | 'warning' | 'success'>('error');
 
   // Функция проверки заполненности всех полей
   const isFormValid = () => {
@@ -146,7 +153,7 @@ export const AddNewPromoCode: FC = () => {
 
   async function createPromocodeBtnHandler() {
     setIsSaving(true);
-    
+
     const data = {
       description_admin: promocodeData.description_admin,
       description_users_de: promocodeData.description_users_de,
@@ -163,8 +170,28 @@ export const AddNewPromoCode: FC = () => {
 
       console.log('[Frontend] Promocode created successfully:', response.data);
       setOpenModal(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Ошибка при создании промокода:', error);
+
+      // Проверяем, есть ли сообщение об ошибке от сервера
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+
+        // Проверяем, является ли ошибка дублированием промокода
+        if (errorMessage === 'Promocode already exists') {
+          setSnackbarMessage(`Code with that name "${promocodeData.code}" already exists`);
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage(errorMessage);
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        }
+      } else {
+        setSnackbarMessage('Error creating promocode. Please try again.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -390,16 +417,16 @@ export const AddNewPromoCode: FC = () => {
 
         <Box component="section" sx={sectionBox}>
       <ListItem>
-          <Tooltip 
+          <Tooltip
             title={!isFormValid() ? "Fill in all inputs" : isSaving ? "Creating..." : ""}
             placement="top"
             arrow
           >
             <span>
-              <Button 
-                variant="contained" 
-                onClick={createPromocodeBtnHandler} 
-                color="success" 
+              <Button
+                variant="contained"
+                onClick={createPromocodeBtnHandler}
+                color="success"
                 sx={{width:200}}
                 disabled={!isFormValid() || isSaving}
                 startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : null}
@@ -432,6 +459,22 @@ export const AddNewPromoCode: FC = () => {
           </Box>
         </Modal>
       </div>
+
+      {/* Snackbar для отображения ошибок */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

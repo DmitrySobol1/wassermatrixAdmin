@@ -43,6 +43,13 @@ export const EditGood: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Состояние для валидации name полей
+  const [nameValidation, setNameValidation] = useState({
+    name_de: { isValid: true, message: '' },
+    name_en: { isValid: true, message: '' },
+    name_ru: { isValid: true, message: '' }
+  });
+
   // Функция проверки заполненности всех полей
   const isFormValid = () => {
     if (!goodInfo) return false;
@@ -156,9 +163,33 @@ export const EditGood: FC = () => {
 
   //@ts-ignore
   const handleAllInput = (e) => {
-    console.log(e.target.name, '=', e.target.value);
+    const { name, value } = e.target;
+    console.log(name, '=', value);
+
+    // Проверка для name полей
+    if (name === 'name_de' || name === 'name_en' || name === 'name_ru') {
+      if (value.length > 20) {
+        setNameValidation({
+          ...nameValidation,
+          [name]: {
+            isValid: false,
+            message: 'Name must be no more than 20 characters for clearly view on app'
+          }
+        });
+        return; // Не обновляем значение, если превышен лимит
+      } else {
+        setNameValidation({
+          ...nameValidation,
+          [name]: {
+            isValid: true,
+            message: ''
+          }
+        });
+      }
+    }
+
     //@ts-ignore
-    setGoodInfo({ ...goodInfo, [e.target.name]: e.target.value });
+    setGoodInfo({ ...goodInfo, [name]: value });
   };
 
   const typeHandler = (event: SelectChangeEvent) => {
@@ -422,6 +453,8 @@ export const EditGood: FC = () => {
                 required
                 onChange={handleAllInput}
                 value={goodInfo?.name_de}
+                error={!nameValidation.name_de.isValid}
+                helperText={nameValidation.name_de.message}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -442,6 +475,8 @@ export const EditGood: FC = () => {
                 required
                 onChange={handleAllInput}
                 value={goodInfo?.name_en}
+                error={!nameValidation.name_en.isValid}
+                helperText={nameValidation.name_en.message}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -462,6 +497,8 @@ export const EditGood: FC = () => {
                 required
                 onChange={handleAllInput}
                 value={goodInfo?.name_ru}
+                error={!nameValidation.name_ru.isValid}
+                helperText={nameValidation.name_ru.message}
                 slotProps={{
                   input: {
                     startAdornment: (

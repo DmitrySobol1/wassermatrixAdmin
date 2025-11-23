@@ -891,50 +891,44 @@ export const Orders: FC = () => {
                                 </Typography>
                               }
                               secondary={
-                                <>
-                                  <Typography
-                                    component="span"
-                                    variant="body2"
-                                    sx={{
-                                      color: 'text.secondary',
-                                      display: 'block',
-                                    }}
-                                  >
-                                    {/* {item.qty} pcs x {item.price_eu} € ={' '}
-                                    {item.qty * item.price_eu} € */}
-                                    {item.qty} pcs x {item.actualPurchasePriceInEu} € ={' '}
-                                    {item.qty * item.actualPurchasePriceInEu} €
-                                    {item.isPurchasedBySale && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by sale</span>}
-                                    {item.isPurchasedByPromocode && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by promocode</span>}
-                                    {item.isPurchasedByCashback && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>written-off cashback</span>}
-                                  </Typography>
-                                  <Typography
-                                    component="span"
-                                    variant="body2"
-                                    sx={{
-                                      color: 'text.secondary',
-                                      display: 'block',
-                                    }}
-                                  >
-                                    Delivery:{' '}
-                                    {
-                                      item[
-                                        `delivery_price_${order.regionDelivery}`
-                                      ]
-                                    }{' '}
-                                    € x {item.qty} ={' '}
-                                    {(
-                                      item[
-                                        `delivery_price_${order.regionDelivery}`
-                                      ] * item.qty
-                                    ).toFixed(2)}{' '}
-                                    €
-                                  </Typography>
-                                </>
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  sx={{
+                                    color: 'text.secondary',
+                                    display: 'block',
+                                  }}
+                                >
+                                  {item.qty} pcs x {item.actualPurchasePriceInEu} € ={' '}
+                                  {(item.qty * item.actualPurchasePriceInEu).toFixed(2)} €
+                                  {item.isPurchasedBySale && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by sale</span>}
+                                  {item.isPurchasedByPromocode && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>by promocode</span>}
+                                  {item.isPurchasedByCashback && <span style={{backgroundColor:'#ed6c02', padding:'2px 5px 2px 5px', marginLeft:10, color: 'white', borderRadius:10}}>written-off cashback</span>}
+                                </Typography>
                               }
                             />
                           </ListItem>
                         ))}
+
+                        {/* Цена доставки */}
+                        <ListItem>
+                          <ListItemText
+                            primary={
+                              <Typography component="span" variant="body1" sx={{ fontWeight: 'bold' }}>
+                                Delivery ({order.regionDelivery}) { ' = '}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                sx={{ color: 'text.secondary' }}
+                              >
+                                {order.deliveryPriceEur?.toFixed(2) || '0.00'} €
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
                       </List>
                     </AccordionDetails>
                   </Accordion>
